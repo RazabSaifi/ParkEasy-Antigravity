@@ -126,25 +126,29 @@ fun ListMySpaceWizard(
     var rulesText by remember { mutableStateOf("Park within marked lines. No commercial repairs. Clean after yourself.") }
     var descriptionText by remember { mutableStateOf("Safe, well-lit covered parking slot with CCTV security. Easy drive-in access.") }
 
+    val isDark = MaterialTheme.colorScheme.background == CharcoalBackground
+
     val textFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedContainerColor = Color.White,
-        unfocusedContainerColor = Color.White,
+        focusedContainerColor = MaterialTheme.colorScheme.surface,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
         focusedBorderColor = PrimaryBlue,
-        unfocusedBorderColor = Slate200,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
         focusedLabelColor = PrimaryBlue,
-        unfocusedLabelColor = Slate500,
+        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
         cursorColor = PrimaryBlue
     )
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFAFAFA))
+            .background(MaterialTheme.colorScheme.background)
             .testTag("list_space_wizard")
     ) {
-        // Clean White Header with Thin ParkEasy Blue Progress Bar
+        // Clean Header with Thin ParkEasy Blue Progress Bar
         Surface(
-            color = Color.White,
+            color = MaterialTheme.colorScheme.surface,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
@@ -163,7 +167,7 @@ fun ListMySpaceWizard(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = Slate700
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                         Spacer(modifier = Modifier.width(6.dp))
@@ -171,13 +175,13 @@ fun ListMySpaceWizard(
                             text = "List your parking space",
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = Slate900
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFEFF6FF)
+                        color = if (isDark) CharcoalElevated else Color(0xFFEFF6FF)
                     ) {
                         Text(
                             text = "Step $step of $totalSteps",
@@ -196,12 +200,12 @@ fun ListMySpaceWizard(
                         .fillMaxWidth()
                         .height(3.dp),
                     color = PrimaryBlue,
-                    trackColor = Color(0xFFE2E8F0)
+                    trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 )
             }
         }
 
-        HorizontalDivider(color = Slate200, thickness = 1.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), thickness = 1.dp)
 
         // Step Form Content
         Column(
@@ -945,13 +949,13 @@ fun ListMySpaceWizard(
             }
         }
 
-        // Consolidate the bottom action area into a clean white surface with clear Primary and Secondary buttons
+        // Consolidate the bottom action area into a clean surface
         Surface(
-            color = Color.White,
+            color = MaterialTheme.colorScheme.surface,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.fillMaxWidth().navigationBarsPadding()) {
-                HorizontalDivider(color = Slate200, thickness = 1.dp)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), thickness = 1.dp)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -963,10 +967,10 @@ fun ListMySpaceWizard(
                     OutlinedButton(
                         onClick = { if (step > 1) step-- else onCancel() },
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Slate200),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.White,
-                            contentColor = Slate700
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         ),
                         modifier = Modifier
                             .weight(1f)
@@ -1045,14 +1049,14 @@ private fun StepHeader(title: String, subtitle: String) {
             text = title,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
-            color = Slate900,
+            color = MaterialTheme.colorScheme.onSurface,
             lineHeight = 24.sp
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = subtitle,
             fontSize = 13.sp,
-            color = Slate500,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 18.sp
         )
     }
