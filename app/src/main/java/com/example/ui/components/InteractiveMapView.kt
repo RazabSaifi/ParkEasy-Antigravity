@@ -77,7 +77,6 @@ import com.example.data.util.LocationUtils
 import com.example.data.util.UserLocation
 import com.example.ui.theme.AccentEmerald
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
 import com.example.ui.theme.CharcoalBackground
 import com.example.ui.theme.CharcoalBorder
 import com.example.ui.theme.CharcoalElevated
