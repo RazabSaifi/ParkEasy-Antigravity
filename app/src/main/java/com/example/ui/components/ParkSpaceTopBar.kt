@@ -18,8 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalParking
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -59,6 +61,8 @@ import com.example.ui.theme.Slate900
 fun ParkSpaceTopBar(
     activeMode: String,
     unreadNotificationCount: Int,
+    isDarkMode: Boolean = false,
+    onToggleDarkMode: () -> Unit = {},
     onModeChange: (String) -> Unit,
     onNotificationsClick: () -> Unit,
     onProfileClick: () -> Unit,
@@ -126,6 +130,23 @@ fun ParkSpaceTopBar(
 
                 // Actions on the right
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Dark / Light Mode Toggle Button (White <-> Dark)
+                    IconButton(
+                        onClick = onToggleDarkMode,
+                        modifier = Modifier
+                            .size(38.dp)
+                            .testTag("topbar_dark_mode_toggle")
+                    ) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode",
+                            tint = if (isDarkMode) Color(0xFFFBBF24) else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
                     if (activeMode == "Provider" || activeMode == "Admin") {
                         // Provider / Admin Mode Dropdown Selector
                         Box {
