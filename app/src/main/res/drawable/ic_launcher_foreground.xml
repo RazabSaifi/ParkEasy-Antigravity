@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Safe zone 66dp centered within 108dp: (21, 21) to (87, 87) -->
+    <!-- Location Pin Base Drop Shadow -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M54,84c-1.5,0 -16,-17 -16,-28a16,16 0 1,1 32,0c0,11 -14.5,28 -16,28z" />
+    <!-- Gradient Location Pin -->
+    <path
+        android:pathData="M54,82c-1.5,0 -16,-17 -16,-28a16,16 0 1,1 32,0c0,11 -14.5,28 -16,28z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="38"
+                android:startY="36"
+                android:endX="70"
+                android:endY="82"
+                android:type="linear">
+                <item android:color="#2563EB" android:offset="0.0" />
+                <item android:color="#0D9488" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Inner White Circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,54m-11,0a11,11 0 1,0 22,0a11,11 0 1,0 -22,0" />
+    <!-- Bold 'P' inside pin -->
+    <path
+        android:fillColor="#1E3A8A"
+        android:pathData="M51,47h4.8c1.8,0 3.2,1.2 3.2,2.8s-1.4,2.8 -3.2,2.8H53.5v5.4H51V47z M53.5,50.6h2.2c0.7,0 1.2,-0.4 1.2,-1s-0.5,-1 -1.2,-1H53.5v2z" />
+    <!-- Small electric cyan indicator dot -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M63,44m-2.5,0a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0" />
+</vector>
