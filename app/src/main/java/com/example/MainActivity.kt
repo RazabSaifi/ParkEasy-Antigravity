@@ -88,6 +88,9 @@ fun ParkSpaceApp(
     val statusMessage by viewModel.statusMessage.collectAsStateWithLifecycle()
     val userLocation by viewModel.userLocation.collectAsStateWithLifecycle()
     val isLocating by viewModel.isLocating.collectAsStateWithLifecycle()
+    val darkModePreference by viewModel.darkModePreference.collectAsStateWithLifecycle()
+    val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val isDark = darkModePreference ?: systemDark
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -143,6 +146,8 @@ fun ParkSpaceApp(
                 ParkSpaceTopBar(
                     activeMode = activeMode,
                     unreadNotificationCount = unreadNotificationsCount,
+                    isDarkMode = isDark,
+                    onToggleDarkMode = { viewModel.toggleDarkMode() },
                     onModeChange = { mode -> viewModel.setMode(mode) },
                     onNotificationsClick = { showNotificationDialog = true },
                     onProfileClick = { viewModel.navigateTo(AppScreen.PROFILE) },
@@ -360,7 +365,9 @@ fun ParkSpaceApp(
                             onModeChange = { mode -> viewModel.setMode(mode) },
                             onAddVehicle = { t, r, m -> viewModel.addVehicle(t, r, m) },
                             onDeleteVehicle = { id -> viewModel.deleteVehicle(id) },
-                            onSubmitKyc = { viewModel.submitKycVerification() }
+                            onSubmitKyc = { viewModel.submitKycVerification() },
+                            darkModePreference = darkModePreference,
+                            onToggleDarkMode = { viewModel.toggleDarkMode() }
                         )
                     }
                     AppScreen.ADMIN_DASHBOARD -> {
