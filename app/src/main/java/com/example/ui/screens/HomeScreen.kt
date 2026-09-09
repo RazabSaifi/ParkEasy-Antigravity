@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.NearMe
@@ -314,6 +315,22 @@ fun HomeScreen(
                                 .weight(1f)
                                 .testTag("home_search_input")
                         )
+                        if (query.isNotEmpty()) {
+                            IconButton(
+                                onClick = {
+                                    query = ""
+                                    onSearch("")
+                                },
+                                modifier = Modifier.size(32.dp).testTag("home_search_clear_btn")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Clear search",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
                         IconButton(
                             onClick = onExploreAll,
                             modifier = Modifier.size(36.dp)

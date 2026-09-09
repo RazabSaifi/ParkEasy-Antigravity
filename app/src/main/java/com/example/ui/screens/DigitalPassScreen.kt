@@ -278,6 +278,24 @@ fun DigitalPassScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(booking.bookingCode, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, letterSpacing = 2.sp)
                             Text("Show this QR pass or tell booking ID to security guard", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                            if (isPassScanned) {
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = AccentEmerald.copy(alpha = 0.15f),
+                                    border = BorderStroke(1.dp, AccentEmerald.copy(alpha = 0.5f))
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                    ) {
+                                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = AccentEmerald, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Gate Guard Verified — Vehicle Checked In", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = AccentEmerald)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -285,7 +303,7 @@ fun DigitalPassScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Action Buttons: Directions & Call Provider
+            // Action Buttons: Directions & Gate Check-In Simulation
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
                     onClick = {
@@ -310,18 +328,23 @@ fun DigitalPassScreen(
 
                 OutlinedButton(
                     onClick = {
-                        isPassScanned = true
+                        isPassScanned = !isPassScanned
                     },
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+                    border = BorderStroke(1.dp, if (isPassScanned) AccentEmerald else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onSurface
+                        contentColor = if (isPassScanned) AccentEmerald else MaterialTheme.colorScheme.onSurface
                     ),
                     modifier = Modifier.weight(1f).height(48.dp).testTag("pass_simulate_scan_button")
                 ) {
-                    Icon(Icons.Default.QrCodeScanner, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = if (isPassScanned) Icons.Default.CheckCircle else Icons.Default.QrCodeScanner,
+                        contentDescription = null,
+                        tint = if (isPassScanned) AccentEmerald else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(if (isPassScanned) "Verified ✓" else "Gate Check-In", fontSize = 13.sp)
+                    Text(if (isPassScanned) "Checked In ✓" else "Gate Check-In", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

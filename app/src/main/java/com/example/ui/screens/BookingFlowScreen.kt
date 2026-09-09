@@ -111,6 +111,7 @@ fun BookingFlowScreen(
     var durationHours by remember { mutableIntStateOf(3) }
     var selectedVehicleName by remember { mutableStateOf("White Swift Dzire") }
     var selectedVehicleReg by remember { mutableStateOf("KA 01 AB 1234") }
+    var selectedPaymentMethod by remember { mutableStateOf("Google Pay") }
     var showAddVehicleDialog by remember { mutableStateOf(false) }
     var newVehicleName by remember { mutableStateOf("") }
     var newVehicleReg by remember { mutableStateOf("") }
@@ -636,6 +637,94 @@ fun BookingFlowScreen(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // 4. Select Payment Method
+                    Text(
+                        text = "4. Select Payment Method",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    val paymentApps = listOf(
+                        Triple("Google Pay", "Instant UPI Checkout", Color(0xFF4285F4)),
+                        Triple("PhonePe", "Instant UPI Checkout", Color(0xFF5F259F)),
+                        Triple("Paytm UPI", "Fast Wallet & UPI", Color(0xFF00BAF2)),
+                        Triple("BHIM / NetBanking", "All Indian Banks", Color(0xFFFF9933))
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        paymentApps.forEach { (appName, appDesc, brandColor) ->
+                            val isSelected = selectedPaymentMethod == appName
+                            Surface(
+                                shape = RoundedCornerShape(14.dp),
+                                color = if (isSelected) (if (isDark) CharcoalElevated else Color(0xFFEFF6FF)) else MaterialTheme.colorScheme.surface,
+                                border = BorderStroke(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedPaymentMethod = appName }
+                                    .testTag("payment_option_${appName.lowercase().replace(" ", "_")}")
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(12.dp)
+                                ) {
+                                    RadioButton(
+                                        selected = isSelected,
+                                        onClick = { selectedPaymentMethod = appName }
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(brandColor.copy(alpha = 0.15f))
+                                    ) {
+                                        Text(
+                                            text = appName.take(1),
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 16.sp,
+                                            color = brandColor
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = appName,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = appDesc,
+                                            fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    if (isSelected) {
+                                        Surface(
+                                            shape = RoundedCornerShape(20.dp),
+                                            color = PrimaryBlue.copy(alpha = 0.15f)
+                                        ) {
+                                            Text(
+                                                text = "SELECTED",
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = PrimaryBlue,
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
@@ -661,7 +750,7 @@ fun BookingFlowScreen(
                                     subtotal,
                                     platformFee,
                                     totalAmount,
-                                    "Instant UPI",
+                                    selectedPaymentMethod,
                                     { booking ->
                                         isProcessingPayment = false
                                         confirmedBooking = booking

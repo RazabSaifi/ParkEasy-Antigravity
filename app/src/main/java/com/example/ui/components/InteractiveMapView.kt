@@ -334,19 +334,32 @@ fun InteractiveMapView(
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = markerBgColor,
-                    shadowElevation = if (isSelected) 6.dp else 2.dp,
+                    shadowElevation = if (isSelected) 6.dp else 3.dp,
                     border = androidx.compose.foundation.BorderStroke(
-                        width = 1.dp,
+                        width = if (isSelected) 2.dp else 1.dp,
                         color = markerBorderColor
                     )
                 ) {
-                    Text(
-                        text = "₹${space.hourlyPrice.toInt()}",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = markerTextColor,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                    )
+                    ) {
+                        if (space.hasEvCharging) {
+                            Icon(
+                                imageVector = Icons.Default.ElectricCar,
+                                contentDescription = "EV Charging",
+                                tint = if (isSelected) Color.White else AccentEmerald,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+                        Text(
+                            text = "₹${space.hourlyPrice.toInt()}/hr",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = markerTextColor
+                        )
+                    }
                 }
             }
         }
