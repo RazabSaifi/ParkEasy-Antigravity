@@ -413,7 +413,7 @@ fun HomeScreen(
             }
         }
 
-        items(filteredSpaces) { space ->
+        items(filteredSpaces, key = { space -> space.id }) { space ->
             Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
                 ParkingCard(
                     space = space,

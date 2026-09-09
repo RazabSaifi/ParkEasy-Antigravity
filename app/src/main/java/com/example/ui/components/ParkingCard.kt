@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.data.model.ParkingSpace
 import com.example.data.util.LocationUtils
@@ -100,11 +101,17 @@ fun ParkingCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 if (space.parkingPhoto.isNotEmpty()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
+                    val context = LocalContext.current
+                    val imageRequest = remember(space.parkingPhoto, context) {
+                        ImageRequest.Builder(context)
                             .data(space.parkingPhoto)
-                            .crossfade(true)
-                            .build(),
+                            .crossfade(150)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .build()
+                    }
+                    AsyncImage(
+                        model = imageRequest,
                         contentDescription = space.title,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -229,12 +236,14 @@ fun ParkingCard(
             Spacer(modifier = Modifier.height(6.dp))
 
             // Feature Highlights: Covered · CCTV · Guard
-            val features = buildList {
-                if (space.isCovered) add("Covered")
-                if (space.hasCctv) add("CCTV")
-                if (space.hasSecurityGuard) add("Guard")
-                if (space.hasEvCharging) add("EV")
-            }.take(3).joinToString(" · ")
+            val features = remember(space.isCovered, space.hasCctv, space.hasSecurityGuard, space.hasEvCharging) {
+                buildList {
+                    if (space.isCovered) add("Covered")
+                    if (space.hasCctv) add("CCTV")
+                    if (space.hasSecurityGuard) add("Guard")
+                    if (space.hasEvCharging) add("EV")
+                }.take(3).joinToString(" · ")
+            }
 
             if (features.isNotEmpty()) {
                 Text(
@@ -348,11 +357,17 @@ fun CompactParkingCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 if (space.parkingPhoto.isNotEmpty()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
+                    val compactContext = LocalContext.current
+                    val compactImageRequest = remember(space.parkingPhoto, compactContext) {
+                        ImageRequest.Builder(compactContext)
                             .data(space.parkingPhoto)
-                            .crossfade(true)
-                            .build(),
+                            .crossfade(150)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .build()
+                    }
+                    AsyncImage(
+                        model = compactImageRequest,
                         contentDescription = space.title,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()

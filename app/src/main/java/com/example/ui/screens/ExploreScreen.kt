@@ -633,7 +633,7 @@ private fun ParkingListContent(
                     modifier = Modifier.padding(vertical = 6.dp)
                 )
             }
-            items(spaces) { space ->
+            items(spaces, key = { space -> space.id }) { space ->
                 Box(modifier = Modifier.padding(vertical = 6.dp)) {
                     ParkingCard(
                         space = space,

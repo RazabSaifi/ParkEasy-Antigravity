@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +58,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.example.data.model.Booking
 import com.example.ui.theme.AccentEmerald
 import com.example.ui.theme.CharcoalBackground
@@ -468,8 +471,17 @@ private fun BookingCard(
                 verticalAlignment = Alignment.Top
             ) {
                 // Parking image thumbnail
+                val context = LocalContext.current
+                val imageRequest = remember(photoUrl, context) {
+                    ImageRequest.Builder(context)
+                        .data(photoUrl)
+                        .crossfade(150)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .build()
+                }
                 AsyncImage(
-                    model = photoUrl,
+                    model = imageRequest,
                     contentDescription = booking.parkingTitle,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
