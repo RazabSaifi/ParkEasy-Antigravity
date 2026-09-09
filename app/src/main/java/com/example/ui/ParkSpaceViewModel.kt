@@ -105,8 +105,8 @@ class ParkSpaceViewModel(application: Application) : AndroidViewModel(applicatio
         showMessage(label)
     }
 
-    fun toggleDarkMode() {
-        val current = _darkModePreference.value ?: false
+    fun toggleDarkMode(currentIsDark: Boolean? = null) {
+        val current = currentIsDark ?: _darkModePreference.value ?: true
         setDarkMode(!current)
     }
 

@@ -147,7 +147,7 @@ fun ParkSpaceApp(
                     activeMode = activeMode,
                     unreadNotificationCount = unreadNotificationsCount,
                     isDarkMode = isDark,
-                    onToggleDarkMode = { viewModel.toggleDarkMode() },
+                    onToggleDarkMode = { viewModel.toggleDarkMode(isDark) },
                     onModeChange = { mode -> viewModel.setMode(mode) },
                     onNotificationsClick = { showNotificationDialog = true },
                     onProfileClick = { viewModel.navigateTo(AppScreen.PROFILE) },
@@ -367,7 +367,7 @@ fun ParkSpaceApp(
                             onDeleteVehicle = { id -> viewModel.deleteVehicle(id) },
                             onSubmitKyc = { viewModel.submitKycVerification() },
                             darkModePreference = darkModePreference,
-                            onToggleDarkMode = { viewModel.toggleDarkMode() }
+                            onToggleDarkMode = { viewModel.toggleDarkMode(isDark) }
                         )
                     }
                     AppScreen.ADMIN_DASHBOARD -> {
