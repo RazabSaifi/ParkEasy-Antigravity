@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ParkEasy — Real-Time Smart Parking & Hosting Platform</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            charcoal: {
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+              600: '#475569',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- QRCode.js for Digital Pass Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Navigation Bar -->
+  <header class="glass-nav sticky top-0 z-40 px-4 lg:px-8 py-3 transition-all duration-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-blue-600/40 group-hover:scale-105 transition-transform">
+          P
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white">Park<span class="text-blue-500">Easy</span></span>
+          <span class="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Live Sync</span>
+        </div>
+      </a>
+
+      <!-- Real-Time Sync Indicator & Quick Actions -->
+      <div class="flex items-center gap-3">
+        
+        <!-- Firebase Cloud Sync Status Badge -->
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Cloud Sync Active</span>
+        </div>
+
+        <!-- Android APK Download Button -->
+        <a href="https://github.com/RazabSaifi/ParkEasy-Antigravity/actions" target="_blank" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">
+          <i class="fa-brands fa-android text-emerald-400 text-sm"></i>
+          <span>Download App</span>
+        </a>
+
+        <!-- List My Space Button -->
+        <button id="btn-open-list-modal" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-0.5">
+          <i class="fa-solid fa-plus"></i>
+          <span>List Spot</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Header & Search Filters -->
+  <section class="relative px-4 lg:px-8 pt-8 pb-6 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-1">
+            Find & Reserve Parking Near You
+          </h1>
+          <p class="text-sm text-slate-400">
+            Real-time multi-device database synchronized with ParkEasy Android App.
+          </p>
+        </div>
+        
+        <!-- Mode Selector: Seeker / Host / Admin -->
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-800 border border-slate-700/60 text-xs font-semibold">
+          <button id="tab-seeker" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white shadow-sm transition">Find Parking</button>
+          <button id="tab-provider" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Host Dashboard</button>
+        </div>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+        
+        <!-- Search Input -->
+        <div class="md:col-span-6 relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 text-sm"></i>
+          <input type="text" id="search-input" placeholder="Search destination, street, or area..." class="w-full pl-11 pr-10 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition">
+          <button id="btn-clear-search" class="hidden absolute right-3 top-3 text-slate-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+
+        <!-- City Select Dropdown -->
+        <div class="md:col-span-3">
+          <select id="city-select" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition cursor-pointer">
+            <option value="All Cities">🌆 All Cities</option>
+            <option value="Bengaluru" selected>📍 Bengaluru</option>
+            <option value="New Delhi">📍 New Delhi</option>
+            <option value="Mumbai">📍 Mumbai</option>
+            <option value="Hyderabad">📍 Hyderabad</option>
+            <option value="Pune">📍 Pune</option>
+          </select>
+        </div>
+
+        <!-- Near Me Quick GPS Button -->
+        <div class="md:col-span-3">
+          <button id="btn-near-me" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-semibold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-location-crosshairs text-emerald-400"></i>
+            <span>GPS Near Me</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Filter Pills Row -->
+      <div class="flex items-center gap-2 overflow-x-auto pt-4 pb-1 no-scrollbar text-xs font-semibold">
+        <span class="text-slate-400 mr-1">Filter:</span>
+        <button class="filter-pill active px-3.5 py-1.5 rounded-full bg-blue-600 text-white border border-blue-500" data-filter="All">All Spots</button>
+        <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600" data-filter="Covered">🚘 Covered Roof</button>
+        <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600" data-filter="EV Charging">⚡ EV Charging</button>
+        <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600" data-filter="Under ₹50">🏷️ Under ₹50/hr</button>
+        <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600" data-filter="24/7">🕒 24/7 Access</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Main Content Area: Split View List + Map -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
+    
+    <!-- Seeker View -->
+    <div id="view-seeker" class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-280px)] min-h-[550px]">
+      
+      <!-- Left Column: Parking Spots List -->
+      <div class="lg:col-span-6 flex flex-col h-full">
+        <div class="flex items-center justify-between mb-3 px-1">
+          <span id="spots-count" class="text-xs font-bold text-slate-400">Loading live spots...</span>
+          <button id="btn-refresh-sync" class="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh Sync
+          </button>
+        </div>
+
+        <div id="spots-list-container" class="flex-1 overflow-y-auto space-y-4 pr-1">
+          <!-- Parking Cards will be rendered dynamically via JS -->
+          <div class="glass-card rounded-2xl p-6 text-center skeleton-loader">
+            <p class="text-slate-400 text-sm">Connecting to Firebase Cloud Firestore...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Map -->
+      <div class="lg:col-span-6 h-full min-h-[350px] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative">
+        <div id="leaflet-map" class="w-full h-full z-10"></div>
+
+        <!-- Map Layer Switcher Floating Controls -->
+        <div class="absolute top-3 right-3 z-20 flex flex-col gap-2">
+          <button id="btn-recenter-map" class="w-9 h-9 rounded-xl bg-slate-900/90 text-blue-400 border border-slate-700 flex items-center justify-center shadow-lg hover:bg-slate-800 transition">
+            <i class="fa-solid fa-crosshairs text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Provider/Host Dashboard View (Initially Hidden) -->
+    <div id="view-provider" class="hidden flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass-card p-5 rounded-2xl border border-slate-800">
+          <div class="text-xs font-semibold text-slate-400 mb-1">Total Available Balance</div>
+          <div class="text-2xl font-black text-white" id="host-balance">₹4,250</div>
+          <button id="btn-withdraw" class="mt-3 w-full py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">Withdraw to UPI</button>
+        </div>
+        <div class="glass-card p-5 rounded-2xl border border-slate-800">
+          <div class="text-xs font-semibold text-slate-400 mb-1">My Active Listings</div>
+          <div class="text-2xl font-black text-blue-400" id="host-listings-count">0 Listings</div>
+          <button id="btn-dashboard-add" class="mt-3 w-full py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition">+ Add New Space</button>
+        </div>
+        <div class="glass-card p-5 rounded-2xl border border-slate-800">
+          <div class="text-xs font-semibold text-slate-400 mb-1">Completed Bookings</div>
+          <div class="text-2xl font-black text-amber-400" id="host-bookings-count">14 Reservations</div>
+          <div class="mt-3 text-xs text-slate-400">100% verified payout rate</div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-slate-800">
+        <h3 class="text-lg font-bold text-white mb-4">My Listed Parking Slots</h3>
+        <div id="provider-listings-list" class="space-y-3">
+          <p class="text-slate-400 text-sm">Loading your host spaces...</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal 1: List Parking Space Wizard -->
+  <div id="modal-list-space" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-xl rounded-2xl border border-slate-700 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-square-plus text-blue-500"></i> List Your Parking Space
+        </h3>
+        <button class="btn-close-modal text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <form id="form-list-space" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+        
+        <!-- GPS Auto Pinning Action -->
+        <div class="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-between cursor-pointer hover:bg-blue-500/20 transition" id="btn-gps-pin-modal">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">📍</div>
+            <div>
+              <div class="font-bold text-blue-400 text-sm">Detect & Pin Current GPS Coordinates</div>
+              <div class="text-slate-400 text-[11px]" id="gps-pin-status">Click to auto-fill address and store exact map location</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-blue-400"></i>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Listing Title / Name *</label>
+          <input type="text" id="space-title" required placeholder="e.g. Covered Driveway Slot - Indiranagar" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Locality / Area *</label>
+            <input type="text" id="space-area" required placeholder="e.g. Indiranagar" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">City *</label>
+            <input type="text" id="space-city" required value="Bengaluru" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Full Street Address *</label>
+          <input type="text" id="space-address" required placeholder="e.g. 14, 12th Main Road, HAL 2nd Stage" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Hourly Rate (₹) *</label>
+            <input type="number" id="space-price" required value="40" min="10" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Parking Type</label>
+            <select id="space-type" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+              <option value="Residential">Residential Driveway</option>
+              <option value="Commercial">Commercial Plot</option>
+              <option value="Basement">Underground Basement</option>
+              <option value="Open Plot">Open Plot Compound</option>
+              <option value="Private Garage">Private Garage</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Vehicle Capacity</label>
+            <input type="number" id="space-capacity" value="2" min="1" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <!-- Amenities Checkboxes -->
+        <div class="pt-2">
+          <label class="block font-semibold text-slate-300 mb-2">Facilities & Safety Features</label>
+          <div class="grid grid-cols-2 gap-2 text-slate-300">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chk-covered" checked class="rounded accent-blue-600"> Covered Roof</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chk-cctv" checked class="rounded accent-blue-600"> CCTV Camera</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chk-guard" class="rounded accent-blue-600"> Security Guard</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chk-ev" class="rounded accent-blue-600"> EV Charger</label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition">
+          Publish Space to Cloud Database 🚀
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Modal 2: Driver Booking & UPI Payment Modal -->
+  <div id="modal-booking" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-md rounded-2xl border border-slate-700 overflow-hidden flex flex-col">
+      
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-ticket text-emerald-400"></i> Reserve Parking Pass
+        </h3>
+        <button class="btn-close-modal text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs">
+        <div id="booking-spot-summary" class="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700">
+          <div class="font-bold text-white text-sm" id="bk-title">Parking Space</div>
+          <div class="text-slate-400 text-xs mt-0.5" id="bk-address">Address...</div>
+          <div class="mt-2 text-emerald-400 font-bold" id="bk-price">₹40 / hour</div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Vehicle Registration Number *</label>
+          <input type="text" id="bk-reg-no" value="KA-01-AB-1234" required class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm uppercase focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Duration (Hours)</label>
+            <select id="bk-hours" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+              <option value="1">1 Hour</option>
+              <option value="2" selected>2 Hours</option>
+              <option value="4">4 Hours</option>
+              <option value="8">8 Hours (Full Day)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Select UPI App</label>
+            <select id="bk-upi" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+              <option value="Google Pay">Google Pay</option>
+              <option value="PhonePe">PhonePe</option>
+              <option value="Paytm">Paytm</option>
+              <option value="BHIM UPI">BHIM UPI</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Total Price Summary -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/60 font-semibold text-sm">
+          <span class="text-slate-300">Total Payable:</span>
+          <span class="text-emerald-400 font-extrabold text-base" id="bk-total-amount">₹90</span>
+        </div>
+
+        <button id="btn-confirm-booking" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition">
+          Pay & Confirm Digital Pass 🎉
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal 3: Digital Pass QR Code Modal -->
+  <div id="modal-pass" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-sm rounded-2xl border border-slate-700 overflow-hidden text-center p-6 space-y-4">
+      <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-white">Booking Confirmed!</h3>
+        <p class="text-xs text-slate-400" id="pass-code">Pass #PS-84920</p>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl inline-block shadow-inner mx-auto" id="qrcode-container"></div>
+
+      <div class="text-xs text-slate-300 space-y-1 text-left bg-slate-800/60 p-3 rounded-xl border border-slate-700">
+        <div class="font-bold text-white" id="pass-spot-name">Parking Spot</div>
+        <div id="pass-time">Valid Today • 2 Hours</div>
+        <div id="pass-reg">Vehicle: KA-01-AB-1234</div>
+      </div>
+
+      <button class="btn-close-modal w-full py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold">Done</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-slate-800/80 py-6 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>
+        © 2026 ParkEasy Platform • Powered by Real-Time Firebase Cloud Firestore
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <a href="https://github.com/RazabSaifi/ParkEasy-Antigravity" target="_blank" class="hover:text-blue-400 transition">
+          <i class="fa-brands fa-github text-sm"></i> GitHub Repository
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Application JS -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
