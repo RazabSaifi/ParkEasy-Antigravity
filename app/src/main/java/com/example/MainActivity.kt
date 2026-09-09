@@ -366,6 +366,7 @@ fun ParkSpaceApp(
                             onAddVehicle = { t, r, m -> viewModel.addVehicle(t, r, m) },
                             onDeleteVehicle = { id -> viewModel.deleteVehicle(id) },
                             onSubmitKyc = { viewModel.submitKycVerification() },
+                            onUpdateProfile = { name, phone, email -> viewModel.updateUserProfile(name, phone, email) },
                             darkModePreference = darkModePreference,
                             onToggleDarkMode = { viewModel.toggleDarkMode(isDark) }
                         )

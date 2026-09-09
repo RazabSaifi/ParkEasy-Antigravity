@@ -48,6 +48,18 @@ class ParkSpaceRepository(private val database: AppDatabase) {
         userDao.setActiveMode(userId, mode)
     }
 
+    suspend fun updateUserProfile(userId: Long = 1L, name: String, phone: String, email: String) = withContext(Dispatchers.IO) {
+        userDao.updateProfile(userId, name, phone, email)
+        notificationDao.insertNotification(
+            NotificationItem(
+                userId = userId,
+                title = "Profile Updated ✨",
+                message = "Your profile details (Name, Phone, Email) have been updated successfully.",
+                type = "Security"
+            )
+        )
+    }
+
     suspend fun updateKyc(userId: Long = 1L, idVerified: Boolean, propVerified: Boolean) = withContext(Dispatchers.IO) {
         userDao.updateKyc(userId, idVerified, propVerified)
         notificationDao.insertNotification(

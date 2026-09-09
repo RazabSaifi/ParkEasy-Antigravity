@@ -529,6 +529,14 @@ class ParkSpaceViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    // Profile Management
+    fun updateUserProfile(name: String, phone: String, email: String) {
+        viewModelScope.launch {
+            repository.updateUserProfile(1L, name, phone, email)
+            showMessage("Profile details updated successfully ✨")
+        }
+    }
+
     // KYC & Verification
     fun submitKycVerification() {
         viewModelScope.launch {

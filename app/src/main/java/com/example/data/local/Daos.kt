@@ -36,6 +36,9 @@ interface UserDao {
     @Query("UPDATE users SET isIdVerified = :idVerified, isPropertyVerified = :propVerified WHERE id = :userId")
     suspend fun updateKyc(userId: Long, idVerified: Boolean, propVerified: Boolean)
 
+    @Query("UPDATE users SET name = :name, phone = :phone, email = :email WHERE id = :userId")
+    suspend fun updateProfile(userId: Long, name: String, phone: String, email: String)
+
     @Query("SELECT * FROM users ORDER BY id ASC")
     fun getAllUsers(): Flow<List<User>>
 }

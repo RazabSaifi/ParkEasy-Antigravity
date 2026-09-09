@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Logout
@@ -91,10 +92,12 @@ fun ProfileScreen(
     onAddVehicle: (type: String, reg: String, model: String) -> Unit,
     onDeleteVehicle: (Long) -> Unit,
     onSubmitKyc: () -> Unit,
+    onUpdateProfile: (name: String, phone: String, email: String) -> Unit = { _, _, _ -> },
     modifier: Modifier = Modifier,
     darkModePreference: Boolean? = null,
     onToggleDarkMode: () -> Unit = {}
 ) {
+    var showEditProfileDialog by remember { mutableStateOf(false) }
     var showAddVehicleDialog by remember { mutableStateOf(false) }
     var vehicleTypeInput by remember { mutableStateOf("Car") }
     var vehicleRegInput by remember { mutableStateOf("") }
@@ -171,17 +174,33 @@ fun ProfileScreen(
                     )
                 }
 
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = if (isDark) Color(0xFF143026) else Color(0xFFDCFCE7)
-                ) {
-                    Text(
-                        text = "Verified ✓",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isDark) Color(0xFF4ADE80) else Color(0xFF15803D),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { showEditProfileDialog = true },
+                        modifier = Modifier.size(36.dp).testTag("edit_profile_icon_btn")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit Profile",
+                            tint = PrimaryBlue,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (isDark) Color(0xFF143026) else Color(0xFFDCFCE7)
+                    ) {
+                        Text(
+                            text = "Verified ✓",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isDark) Color(0xFF4ADE80) else Color(0xFF15803D),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        )
+                    }
                 }
             }
         }
@@ -555,12 +574,9 @@ fun ProfileScreen(
                     ProfileSettingRow(
                         icon = Icons.Default.Person,
                         title = "Personal Information",
-                        subtitle = "Name, contact details, emergency contacts",
+                        subtitle = "Tap to edit Name, Phone, Email & Contact details",
                         onClick = {
-                            showInfoDialog = Pair(
-                                "Personal Information",
-                                "Name: ${user?.name ?: "Rohan Sharma"}\nPhone: ${user?.phone ?: "+91 98765 43210"}\nEmail: ${user?.email ?: "rohan.sharma@example.com"}\nCity: Bengaluru, Karnataka"
-                            )
+                            showEditProfileDialog = true
                         }
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), thickness = 1.dp)
@@ -623,6 +639,124 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
         }
+    }
+
+    // Edit Profile Details Dialog
+    if (showEditProfileDialog) {
+        var nameInput by remember { mutableStateOf(user?.name ?: "") }
+        var phoneInput by remember { mutableStateOf(user?.phone ?: "") }
+        var emailInput by remember { mutableStateOf(user?.email ?: "") }
+
+        AlertDialog(
+            onDismissRequest = { showEditProfileDialog = false },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        tint = PrimaryBlue,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Edit Profile Details",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "Update your account details below:",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    OutlinedTextField(
+                        value = nameInput,
+                        onValueChange = { nameInput = it },
+                        label = { Text("Full Name") },
+                        singleLine = true,
+                        leadingIcon = {
+                            Icon(Icons.Default.Person, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(18.dp))
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedBorderColor = PrimaryBlue,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        ),
+                        modifier = Modifier.fillMaxWidth().testTag("edit_profile_name_input")
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    OutlinedTextField(
+                        value = phoneInput,
+                        onValueChange = { phoneInput = it },
+                        label = { Text("Phone Number") },
+                        singleLine = true,
+                        leadingIcon = {
+                            Icon(Icons.Default.Phone, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(18.dp))
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedBorderColor = PrimaryBlue,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        ),
+                        modifier = Modifier.fillMaxWidth().testTag("edit_profile_phone_input")
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    OutlinedTextField(
+                        value = emailInput,
+                        onValueChange = { emailInput = it },
+                        label = { Text("Email Address") },
+                        singleLine = true,
+                        leadingIcon = {
+                            Icon(Icons.Default.Email, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(18.dp))
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedBorderColor = PrimaryBlue,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        ),
+                        modifier = Modifier.fillMaxWidth().testTag("edit_profile_email_input")
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (nameInput.isNotBlank()) {
+                            onUpdateProfile(nameInput.trim(), phoneInput.trim(), emailInput.trim())
+                            showEditProfileDialog = false
+                        }
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                    modifier = Modifier.testTag("save_profile_btn")
+                ) {
+                    Text("Save Changes", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditProfileDialog = false }) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                }
+            }
+        )
     }
 
     // Add Vehicle Dialog
