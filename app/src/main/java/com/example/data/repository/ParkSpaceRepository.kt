@@ -14,9 +14,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
-import java.util.UUID
+import com.example.data.remote.FirebaseSyncManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 
-class ParkSpaceRepository(private val database: AppDatabase) {
+class ParkSpaceRepository(
+    private val database: AppDatabase,
+    private val coroutineScope: CoroutineScope = GlobalScope
+) {
 
     private val userDao = database.userDao()
     private val spaceDao = database.parkingSpaceDao()
@@ -26,6 +31,7 @@ class ParkSpaceRepository(private val database: AppDatabase) {
     private val notificationDao = database.notificationDao()
     private val blockedSlotDao = database.blockedSlotDao()
     private val settingsDao = database.platformSettingsDao()
+    private val firebaseSyncManager = FirebaseSyncManager.getInstance(database, coroutineScope)
 
     suspend fun ensureDemoDataInitialized() = withContext(Dispatchers.IO) {
         val count = spaceDao.countSpaces()
@@ -38,6 +44,8 @@ class ParkSpaceRepository(private val database: AppDatabase) {
             reviewDao.insertAll(DemoData.initialReviews)
             notificationDao.insertAll(DemoData.initialNotifications)
         }
+        // Start real-time cloud sync with Firebase Cloud Firestore
+        firebaseSyncManager.startRealtimeSync()
     }
 
     // --- Users ---
@@ -97,6 +105,8 @@ class ParkSpaceRepository(private val database: AppDatabase) {
 
     suspend fun createSpace(space: ParkingSpace): Long = withContext(Dispatchers.IO) {
         val id = spaceDao.insertSpace(space)
+        val createdSpace = space.copy(id = id)
+        firebaseSyncManager.publishSpaceToCloud(createdSpace)
         notificationDao.insertNotification(
             NotificationItem(
                 userId = space.ownerId,
@@ -200,7 +210,9 @@ class ParkSpaceRepository(private val database: AppDatabase) {
             )
         )
 
-        booking.copy(id = id)
+        val savedBooking = booking.copy(id = id)
+        firebaseSyncManager.publishBookingToCloud(savedBooking)
+        savedBooking
     }
 
     suspend fun cancelBooking(bookingId: Long, userId: Long = 1L) = withContext(Dispatchers.IO) {
