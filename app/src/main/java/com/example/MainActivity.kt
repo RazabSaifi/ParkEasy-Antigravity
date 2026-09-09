@@ -307,6 +307,8 @@ fun ParkSpaceApp(
                     }
                     AppScreen.LIST_SPACE_WIZARD -> {
                         ListMySpaceWizard(
+                            onRequestGpsLocation = onRequestGpsLocation,
+                            userLocation = userLocation,
                             onCancel = {
                                 if (activeMode == "Provider") {
                                     viewModel.navigateTo(AppScreen.PROVIDER_DASHBOARD)

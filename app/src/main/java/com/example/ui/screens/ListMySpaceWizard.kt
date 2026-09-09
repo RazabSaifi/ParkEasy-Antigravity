@@ -29,16 +29,23 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.ElectricCar
+import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalParking
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Roofing
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableDoubleStateOf
+import com.example.data.util.UserLocation
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -89,7 +96,9 @@ import com.example.ui.theme.Slate900
 fun ListMySpaceWizard(
     onCancel: () -> Unit,
     onPublish: (ParkingSpace) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRequestGpsLocation: () -> Unit = {},
+    userLocation: UserLocation? = null
 ) {
     var step by remember { mutableIntStateOf(1) }
     val totalSteps = 10
@@ -100,6 +109,20 @@ fun ListMySpaceWizard(
     var area by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("Bengaluru") }
     var pincode by remember { mutableStateOf("560038") }
+    var latitude by remember { mutableDoubleStateOf(userLocation?.latitude ?: 12.9716) }
+    var longitude by remember { mutableDoubleStateOf(userLocation?.longitude ?: 77.5946) }
+    var isGpsPinned by remember { mutableStateOf(userLocation != null) }
+
+    LaunchedEffect(userLocation) {
+        if (userLocation != null) {
+            latitude = userLocation.latitude
+            longitude = userLocation.longitude
+            if (address.isBlank()) address = userLocation.name
+            if (area.isBlank()) area = userLocation.locality
+            if (city.isBlank() || city == "Bengaluru") city = userLocation.city
+            isGpsPinned = true
+        }
+    }
     var parkingType by remember { mutableStateOf("Residential") }
     var supportedVehicles by remember { mutableStateOf(setOf("Car", "Bike", "SUV")) }
     var capacity by remember { mutableIntStateOf(2) }
@@ -227,7 +250,53 @@ fun ListMySpaceWizard(
                         title = "Where is your parking space located?",
                         subtitle = "Enter exact street address and landmark so seekers can navigate accurately."
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // GPS Pinning Card
+                    Card(
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onRequestGpsLocation() }
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(14.dp)
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(CircleShape)
+                                    .background(PrimaryBlue)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MyLocation,
+                                    contentDescription = "Pin GPS",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = if (isGpsPinned) "📍 Live GPS Coordinates Pinned!" else "📍 Pin Current GPS Coordinates",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = PrimaryBlue
+                                )
+                                Text(
+                                    text = if (isGpsPinned) "Pin: ${String.format("%.4f", latitude)}, ${String.format("%.4f", longitude)} · Drivers open Google Maps turn-by-turn navigation directly to this pin!" else "Tap to auto-fill address and pin exact GPS coordinates for Google Maps navigation.",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     OutlinedTextField(
                         value = title,
