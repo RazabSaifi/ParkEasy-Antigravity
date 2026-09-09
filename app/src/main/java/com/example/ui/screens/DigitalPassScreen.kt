@@ -58,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.Booking
+import com.example.data.util.LocationUtils
 import com.example.ui.theme.AccentEmerald
 import com.example.ui.theme.CharcoalBackground
 import com.example.ui.theme.CharcoalBorder
@@ -289,12 +290,18 @@ fun DigitalPassScreen(
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
                     onClick = {
-                        val geoUri = Uri.parse("geo:0,0?q=${Uri.encode(booking.parkingTitle + ", " + booking.parkingCity)}")
-                        val mapIntent = Intent(Intent.ACTION_VIEW, geoUri)
+                        val geoQuery = "${booking.parkingTitle}, ${booking.parkingAddress}, ${booking.parkingCity}"
+                        val mapUri = android.net.Uri.parse("google.navigation:q=" + android.net.Uri.encode(geoQuery) + "&mode=d")
+                        val mapIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, mapUri).apply {
+                            setPackage("com.google.android.apps.maps")
+                        }
                         try {
                             context.startActivity(mapIntent)
                         } catch (e: Exception) {
-                            // ignore fallback
+                            val fallbackUri = android.net.Uri.parse("https://www.google.com/maps/search/?api=1&query=" + android.net.Uri.encode(geoQuery))
+                            try {
+                                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, fallbackUri))
+                            } catch (ignored: Exception) {}
                         }
                     },
                     shape = RoundedCornerShape(12.dp),
@@ -303,7 +310,7 @@ fun DigitalPassScreen(
                 ) {
                     Icon(Icons.Default.Directions, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Get Directions", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text("Google Maps", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
 
                 Spacer(modifier = Modifier.width(10.dp))

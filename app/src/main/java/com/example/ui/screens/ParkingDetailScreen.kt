@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.ElectricCar
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -56,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -63,8 +65,17 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.data.model.ParkingSpace
 import com.example.data.model.Review
+import com.example.data.util.LocationUtils
 import com.example.data.util.UserLocation
+import com.example.ui.components.ParkingMapPinBadge
 import com.example.ui.theme.AccentEmerald
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 import com.example.ui.theme.CharcoalBackground
 import com.example.ui.theme.CharcoalBorder
 import com.example.ui.theme.CharcoalElevated
@@ -392,7 +403,146 @@ fun ParkingDetailScreen(
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), thickness = 1.dp)
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Section 2: Rules
+                // Section 2: Location & Google Maps
+                val context = LocalContext.current
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Location & Map",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Button(
+                        onClick = {
+                            LocationUtils.openGoogleMaps(
+                                context = context,
+                                lat = space.latitude,
+                                lng = space.longitude,
+                                label = space.title
+                            )
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier
+                            .height(36.dp)
+                            .testTag("detail_google_maps_btn")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Directions,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Google Maps", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isDark) CharcoalElevated else Slate100,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "${space.address}, ${space.area}, ${space.city}",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        if (userLocation != null) {
+                            val distKm = LocationUtils.calculateDistanceKm(
+                                userLocation.latitude,
+                                userLocation.longitude,
+                                space.latitude,
+                                space.longitude
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "${LocationUtils.formatDistance(distKm)} away (${LocationUtils.formatWalkingTime(distKm)})",
+                                fontSize = 12.sp,
+                                color = AccentEmerald,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Google Maps Compose Embedded Map Preview
+                        val spotPosition = remember(space.latitude, space.longitude) {
+                            LatLng(space.latitude, space.longitude)
+                        }
+                        val miniMapCameraState = rememberCameraPositionState {
+                            position = CameraPosition.fromLatLngZoom(spotPosition, 15f)
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .testTag("detail_google_map_preview")
+                        ) {
+                            GoogleMap(
+                                modifier = Modifier.fillMaxSize(),
+                                cameraPositionState = miniMapCameraState,
+                                uiSettings = MapUiSettings(
+                                    zoomControlsEnabled = false,
+                                    myLocationButtonEnabled = false,
+                                    compassEnabled = false,
+                                    scrollGesturesEnabled = false,
+                                    zoomGesturesEnabled = false,
+                                    tiltGesturesEnabled = false,
+                                    rotationGesturesEnabled = false,
+                                    mapToolbarEnabled = false
+                                ),
+                                onMapClick = {
+                                    LocationUtils.openGoogleMaps(
+                                        context = context,
+                                        lat = space.latitude,
+                                        lng = space.longitude,
+                                        label = space.title
+                                    )
+                                }
+                            ) {
+                                MarkerComposable(
+                                    state = rememberMarkerState(
+                                        key = "detail_spot_${space.id}",
+                                        position = spotPosition
+                                    ),
+                                    title = space.title
+                                ) {
+                                    ParkingMapPinBadge(
+                                        space = space,
+                                        isSelected = true,
+                                        isDark = isDark
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Section 3: Rules
                 Text(
                     text = "Rules",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),

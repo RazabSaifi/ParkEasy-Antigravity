@@ -115,4 +115,23 @@ object LocationUtils {
         val mins = estimateDrivingMinutes(distanceKm)
         return "$mins min drive"
     }
+
+    /**
+     * Opens Google Maps for turnkey turn-by-turn navigation or searching the specific parking location.
+     */
+    fun openGoogleMaps(context: android.content.Context, lat: Double, lng: Double, label: String = "Parking Space") {
+        val uri = android.net.Uri.parse("google.navigation:q=$lat,$lng&mode=d")
+        val mapIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
+            setPackage("com.google.android.apps.maps")
+        }
+        try {
+            context.startActivity(mapIntent)
+        } catch (e: Exception) {
+            // Fallback to standard geo intent or web Google Maps
+            val fallbackUri = android.net.Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lng")
+            try {
+                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, fallbackUri))
+            } catch (ignored: Exception) {}
+        }
+    }
 }
