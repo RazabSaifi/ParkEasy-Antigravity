@@ -1,9 +1,18 @@
-name: Build ParkEasy Android APK
+name: Build ParkEasy APK & Deploy Web App
 
 on:
   push:
     branches: [ "**" ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -49,3 +58,22 @@ jobs:
           name: ParkEasy-APK
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+  deploy-web:
+    name: Deploy Real-Time Web Application to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'public'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
