@@ -270,41 +270,6 @@ fun InteractiveMapView(
                             isDark = isDark
                         )
                     }
-<<<<<<< HEAD
-                    .clickable { onSelectSpace(space.id) }
-                    .testTag("map_marker_${space.id}")
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = markerBgColor,
-                    shadowElevation = if (isSelected) 6.dp else 3.dp,
-                    border = androidx.compose.foundation.BorderStroke(
-                        width = if (isSelected) 2.dp else 1.dp,
-                        color = markerBorderColor
-                    )
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                    ) {
-                        if (space.hasEvCharging) {
-                            Icon(
-                                imageVector = Icons.Default.ElectricCar,
-                                contentDescription = "EV Charging",
-                                tint = if (isSelected) Color.White else AccentEmerald,
-                                modifier = Modifier.size(13.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                        }
-                        Text(
-                            text = "₹${space.hourlyPrice.toInt()}/hr",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = markerTextColor
-                        )
-                    }
-=======
->>>>>>> 17344eb6b3a3406d243c2ae5e44b64350c4f1642
                 }
             }
         } else {
@@ -600,7 +565,7 @@ fun ParkingMapPinBadge(
                 }
 
                 Text(
-                    text = "₹${space.hourlyPrice.toInt()}",
+                    text = "₹${space.hourlyPrice.toInt()}/hr",
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
                     color = textColor
