@@ -70,6 +70,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ParkingSpace
 import com.example.ui.theme.AccentEmerald
+import com.example.ui.theme.CharcoalBackground
+import com.example.ui.theme.CharcoalBorder
+import com.example.ui.theme.CharcoalElevated
+import com.example.ui.theme.CharcoalSubtle
+import com.example.ui.theme.CharcoalSurface
 import com.example.ui.theme.PrimaryBlue
 import com.example.ui.theme.Slate100
 import com.example.ui.theme.Slate200

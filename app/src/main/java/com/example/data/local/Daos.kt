@@ -81,6 +81,12 @@ interface BookingDao {
     @Query("SELECT * FROM bookings WHERE userId = :userId ORDER BY id DESC")
     fun getBookingsByUser(userId: Long): Flow<List<Booking>>
 
+    @Query("SELECT * FROM bookings WHERE userId = :userId AND status = :status ORDER BY id DESC")
+    fun getBookingsByUserAndStatus(userId: Long, status: String): Flow<List<Booking>>
+
+    @Query("SELECT * FROM bookings WHERE parkingSpaceId = :spaceId ORDER BY id DESC")
+    fun getBookingsForSpace(spaceId: Long): Flow<List<Booking>>
+
     @Query("SELECT * FROM bookings WHERE parkingSpaceId IN (SELECT id FROM parking_spaces WHERE ownerId = :ownerId) ORDER BY id DESC")
     fun getBookingsForProvider(ownerId: Long): Flow<List<Booking>>
 
@@ -93,11 +99,23 @@ interface BookingDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBooking(booking: Booking): Long
 
+    @Update
+    suspend fun updateBooking(booking: Booking)
+
     @Query("UPDATE bookings SET status = :status WHERE id = :id")
     suspend fun updateBookingStatus(id: Long, status: String)
 
+    @Query("UPDATE bookings SET startTime = :startTime, endTime = :endTime, durationHours = :durationHours WHERE id = :id")
+    suspend fun updateBookingSchedule(id: Long, startTime: String, endTime: String, durationHours: Int)
+
     @Query("UPDATE bookings SET isReviewed = 1 WHERE id = :id")
     suspend fun markReviewed(id: Long)
+
+    @Delete
+    suspend fun deleteBooking(booking: Booking)
+
+    @Query("DELETE FROM bookings WHERE id = :id")
+    suspend fun deleteBookingById(id: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(bookings: List<Booking>)

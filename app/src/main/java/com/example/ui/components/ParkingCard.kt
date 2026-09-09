@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocalParking
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.data.model.ParkingSpace
+import com.example.data.util.LocationUtils
 import com.example.ui.theme.AccentEmerald
 import com.example.ui.theme.PrimaryBlue
 import com.example.ui.theme.Slate100
@@ -245,7 +247,8 @@ fun ParkingCard(
                 Spacer(modifier = Modifier.height(6.dp))
             }
 
-            // Bottom Row: Price & Available status pill
+            // Bottom Row: Price & Available status pill + Google Maps button
+            val context = LocalContext.current
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -267,18 +270,43 @@ fun ParkingCard(
                     )
                 }
 
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFF15803D).copy(alpha = 0.18f),
-                    border = BorderStroke(1.dp, Color(0xFF15803D).copy(alpha = 0.35f))
-                ) {
-                    Text(
-                        text = "Available",
-                        color = AccentEmerald,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = {
+                            LocationUtils.openGoogleMaps(
+                                context = context,
+                                lat = space.latitude,
+                                lng = space.longitude,
+                                label = space.title
+                            )
+                        },
+                        modifier = Modifier
+                            .size(32.dp)
+                            .testTag("card_google_maps_btn_${space.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Directions,
+                            contentDescription = "Directions in Google Maps",
+                            tint = PrimaryBlue,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFF15803D).copy(alpha = 0.18f),
+                        border = BorderStroke(1.dp, Color(0xFF15803D).copy(alpha = 0.35f))
+                    ) {
+                        Text(
+                            text = "Available",
+                            color = AccentEmerald,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
         }
@@ -403,7 +431,34 @@ fun CompactParkingCard(
                 }
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Google Maps Navigation Quick Button
+            val compactContext = LocalContext.current
+            IconButton(
+                onClick = {
+                    LocationUtils.openGoogleMaps(
+                        context = compactContext,
+                        lat = space.latitude,
+                        lng = space.longitude,
+                        label = space.title
+                    )
+                },
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .testTag("compact_maps_btn_${space.id}")
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Directions,
+                    contentDescription = "Navigate with Google Maps",
+                    tint = PrimaryBlue,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(6.dp))
 
             // Primary Book button
             Button(
