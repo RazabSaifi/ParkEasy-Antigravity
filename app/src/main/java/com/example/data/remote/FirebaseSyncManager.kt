@@ -5,12 +5,13 @@ import android.util.Log
 import com.example.data.local.AppDatabase
 import com.example.data.model.Booking
 import com.example.data.model.ParkingSpace
-import com.google.firebase.FirebaseApp
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.abs
 
 /**
  * Real-Time Firebase Cloud Firestore Synchronization Manager.
@@ -48,7 +49,7 @@ class FirebaseSyncManager private constructor(
             fs.collection(COLLECTION_SPACES)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
-                        Log.e(TAG, "Error listening to parking_spaces Firestore collection", error)
+                        Log.e(TAG, "Error listening to parking_spaces Firestore collection: ${error.localizedMessage}", error)
                         return@addSnapshotListener
                     }
 
@@ -67,7 +68,36 @@ class FirebaseSyncManager private constructor(
                             }
                             if (remoteSpaces.isNotEmpty()) {
                                 db.parkingSpaceDao().insertAll(remoteSpaces)
-                                Log.d(TAG, "Realtime Sync: Inserted ${remoteSpaces.size} spaces into local DB")
+                                Log.d(TAG, "Realtime Sync: Inserted/Updated ${remoteSpaces.size} spaces into local DB")
+                            }
+                        }
+                    }
+                }
+
+            // Listen to real-time additions/modifications to bookings
+            fs.collection(COLLECTION_BOOKINGS)
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to bookings Firestore collection: ${error.localizedMessage}", error)
+                        return@addSnapshotListener
+                    }
+
+                    if (snapshot != null && !snapshot.isEmpty) {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val remoteBookings = mutableListOf<Booking>()
+                            for (doc in snapshot.documents) {
+                                try {
+                                    val booking = docToBooking(doc.id, doc.data ?: emptyMap())
+                                    if (booking != null) {
+                                        remoteBookings.add(booking)
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Failed parsing booking document ${doc.id}", e)
+                                }
+                            }
+                            if (remoteBookings.isNotEmpty()) {
+                                db.bookingDao().insertAll(remoteBookings)
+                                Log.d(TAG, "Realtime Sync: Inserted/Updated ${remoteBookings.size} bookings into local DB")
                             }
                         }
                     }
@@ -85,17 +115,12 @@ class FirebaseSyncManager private constructor(
         try {
             val spaceMap = spaceToMap(space)
             val docId = if (space.id > 0) space.id.toString() else System.currentTimeMillis().toString()
-            fs.collection(COLLECTION_SPACES)
-                .document(docId)
-                .set(spaceMap)
-                .addOnSuccessListener {
-                    Log.d(TAG, "Published space #${space.id} to Firestore successfully!")
-                }
-                .addOnFailureListener { e ->
-                    Log.e(TAG, "Failed to publish space to Firestore", e)
-                }
+            Tasks.await(
+                fs.collection(COLLECTION_SPACES).document(docId).set(spaceMap)
+            )
+            Log.d(TAG, "Published space #${space.id} '${space.title}' to Firestore successfully! docId=$docId")
         } catch (e: Exception) {
-            Log.e(TAG, "Publish space exception", e)
+            Log.e(TAG, "Failed to publish space to Firestore: ${e.localizedMessage}", e)
         }
     }
 
@@ -107,17 +132,12 @@ class FirebaseSyncManager private constructor(
         try {
             val bookingMap = bookingToMap(booking)
             val docId = if (booking.id > 0) booking.id.toString() else booking.bookingCode
-            fs.collection(COLLECTION_BOOKINGS)
-                .document(docId)
-                .set(bookingMap)
-                .addOnSuccessListener {
-                    Log.d(TAG, "Published booking ${booking.bookingCode} to Firestore!")
-                }
-                .addOnFailureListener { e ->
-                    Log.e(TAG, "Failed to publish booking to Firestore", e)
-                }
+            Tasks.await(
+                fs.collection(COLLECTION_BOOKINGS).document(docId).set(bookingMap)
+            )
+            Log.d(TAG, "Published booking ${booking.bookingCode} to Firestore! docId=$docId")
         } catch (e: Exception) {
-            Log.e(TAG, "Publish booking exception", e)
+            Log.e(TAG, "Failed to publish booking to Firestore: ${e.localizedMessage}", e)
         }
     }
 
@@ -158,8 +178,12 @@ class FirebaseSyncManager private constructor(
 
     private fun docToParkingSpace(docId: String, data: Map<String, Any>): ParkingSpace? {
         if (data.isEmpty()) return null
-        val id = (data["id"] as? Number)?.toLong() ?: docId.toLongOrNull() ?: System.currentTimeMillis()
-        val title = data["title"] as? String ?: return null
+        val id = (data["id"] as? Number)?.toLong()
+            ?: (data["id"] as? String)?.toLongOrNull()
+            ?: docId.toLongOrNull()
+            ?: abs(docId.hashCode().toLong())
+
+        val title = data["title"] as? String ?: data["name"] as? String ?: return null
 
         return ParkingSpace(
             id = id,
@@ -214,6 +238,42 @@ class FirebaseSyncManager private constructor(
             "status" to b.status,
             "paymentMethod" to b.paymentMethod,
             "createdAt" to System.currentTimeMillis()
+        )
+    }
+
+    private fun docToBooking(docId: String, data: Map<String, Any>): Booking? {
+        if (data.isEmpty()) return null
+        val id = (data["id"] as? Number)?.toLong()
+            ?: (data["id"] as? String)?.toLongOrNull()
+            ?: docId.toLongOrNull()
+            ?: abs(docId.hashCode().toLong())
+
+        val bookingCode = data["bookingCode"] as? String ?: docId
+
+        return Booking(
+            id = id,
+            bookingCode = bookingCode,
+            userId = (data["userId"] as? Number)?.toLong() ?: 1L,
+            userName = data["userName"] as? String ?: "Commuter",
+            parkingSpaceId = (data["parkingSpaceId"] as? Number)?.toLong() ?: 1L,
+            parkingTitle = data["parkingTitle"] as? String ?: "Parking Slot",
+            parkingAddress = data["parkingAddress"] as? String ?: "",
+            parkingCity = data["parkingCity"] as? String ?: "Bengaluru",
+            vehicleType = data["vehicleType"] as? String ?: "Car",
+            vehicleRegNumber = data["vehicleRegNumber"] as? String ?: "KA-01-AB-1234",
+            bookingDate = data["bookingDate"] as? String ?: "Today",
+            startTime = data["startTime"] as? String ?: "10:00 AM",
+            endTime = data["endTime"] as? String ?: "12:00 PM",
+            durationHours = (data["durationHours"] as? Number)?.toInt() ?: 2,
+            subtotal = (data["subtotal"] as? Number)?.toDouble() ?: 80.0,
+            platformFee = (data["platformFee"] as? Number)?.toDouble() ?: 10.0,
+            totalAmount = (data["totalAmount"] as? Number)?.toDouble() ?: 90.0,
+            status = data["status"] as? String ?: "Confirmed",
+            paymentMethod = data["paymentMethod"] as? String ?: "UPI",
+            paymentStatus = data["paymentStatus"] as? String ?: "Paid",
+            qrData = data["qrData"] as? String ?: "PARKSPACE:$bookingCode",
+            providerEarnings = (data["providerEarnings"] as? Number)?.toDouble() ?: 80.0,
+            isReviewed = data["isReviewed"] as? Boolean ?: false
         )
     }
 

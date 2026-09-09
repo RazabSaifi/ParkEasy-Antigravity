@@ -156,7 +156,7 @@ class ParkSpaceViewModel(application: Application) : AndroidViewModel(applicatio
     val filteredSpaces: StateFlow<List<ParkingSpace>> = combine(allSpaces, _filters, _userLocation) { spaces, f, userLoc ->
         var list = spaces.filter { it.status == "Active" }
 
-        // Search Query
+        // Search Query (Searches across all locations if query typed)
         if (f.searchQuery.isNotBlank()) {
             val q = f.searchQuery.trim().lowercase()
             list = list.filter {
@@ -165,11 +165,12 @@ class ParkSpaceViewModel(application: Application) : AndroidViewModel(applicatio
                 it.city.lowercase().contains(q) ||
                 it.address.lowercase().contains(q)
             }
-        }
-
-        // City
-        if (f.selectedCity != "All Cities") {
-            list = list.filter { it.city.equals(f.selectedCity, ignoreCase = true) }
+        } else if (f.selectedCity != "All Cities") {
+            list = list.filter {
+                it.city.equals(f.selectedCity, ignoreCase = true) ||
+                it.area.equals(f.selectedCity, ignoreCase = true) ||
+                it.city.isBlank()
+            }
         }
 
         // Vehicle Type
@@ -469,7 +470,10 @@ class ParkSpaceViewModel(application: Application) : AndroidViewModel(applicatio
     fun createNewSpace(space: ParkingSpace, onComplete: () -> Unit) {
         viewModelScope.launch {
             repository.createSpace(space)
-            showMessage("Space listed successfully! Pending verification.")
+            if (space.city.isNotBlank() && _filters.value.selectedCity != "All Cities") {
+                _filters.value = _filters.value.copy(selectedCity = space.city)
+            }
+            showMessage("Space '${space.title}' listed and synced live to cloud! 🎉")
             onComplete()
         }
     }
