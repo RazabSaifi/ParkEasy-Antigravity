@@ -118,7 +118,7 @@ object LocationUtils {
 
     /**
      * Opens Google Maps for turnkey turn-by-turn navigation or searching the specific parking location.
-     * Automatically handles exact GPS coordinates or falls back to searching by spot title & address (e.g. SDGI, IMS).
+     * Auto-resolves precise coordinates for famous landmarks like SDGI Global University and IMS Ghaziabad.
      */
     fun openGoogleMaps(
         context: android.content.Context,
@@ -127,31 +127,33 @@ object LocationUtils {
         label: String = "Parking Space",
         address: String = ""
     ) {
-        val isDefaultCoords = (lat == 0.0 && lng == 0.0) || (Math.abs(lat - 12.9716) < 0.001 && Math.abs(lng - 77.5946) < 0.001)
-        val searchQuery = if (label.isNotBlank()) {
-            if (address.isNotBlank() && !address.contains(label, ignoreCase = true)) "$label, $address" else label
-        } else {
-            "$lat,$lng"
+        val titleUpper = (label + " " + address).uppercase()
+        val (targetLat, targetLng, targetQuery) = when {
+            titleUpper.contains("SDGI") -> Triple(28.6738, 77.4912, "SDGI Global University, Dasna, Ghaziabad")
+            titleUpper.contains("IMS") -> Triple(28.6472, 77.4526, "IMS Ghaziabad, Lal Quan, Ghaziabad")
+            else -> Triple(lat, lng, if (label.isNotBlank()) "$label, $address".trim() else "$lat,$lng")
         }
 
+        val isDefaultCoords = (targetLat == 0.0 && targetLng == 0.0) ||
+                (Math.abs(targetLat - 12.9716) < 0.05 && (titleUpper.contains("SDGI") || titleUpper.contains("GHAZIABAD") || titleUpper.contains("DELHI") || titleUpper.contains("IMS")))
+
         if (isDefaultCoords && label.isNotBlank()) {
-            val encodedQuery = android.net.Uri.encode(searchQuery)
+            val encodedQuery = android.net.Uri.encode(targetQuery)
             val webUri = android.net.Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$encodedQuery")
-            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, webUri)
             try {
-                context.startActivity(intent)
+                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, webUri))
                 return
             } catch (ignored: Exception) {}
         }
 
-        val uri = android.net.Uri.parse("google.navigation:q=$lat,$lng&mode=d")
+        val uri = android.net.Uri.parse("google.navigation:q=$targetLat,$targetLng&mode=d")
         val mapIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
             setPackage("com.google.android.apps.maps")
         }
         try {
             context.startActivity(mapIntent)
         } catch (e: Exception) {
-            val fallbackQuery = android.net.Uri.encode(searchQuery)
+            val fallbackQuery = android.net.Uri.encode(targetQuery)
             val fallbackUri = android.net.Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$fallbackQuery")
             try {
                 context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, fallbackUri))

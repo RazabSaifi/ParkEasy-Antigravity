@@ -145,6 +145,29 @@ function getFilteredSpaces() {
   });
 }
 
+// Smart Google Maps Destination Resolver
+function getSmartMapsUrl(space) {
+  if (!space) return "https://www.google.com/maps";
+  const titleUpper = (space.title || "").toUpperCase() + " " + (space.address || "").toUpperCase() + " " + (space.area || "").toUpperCase();
+  
+  if (titleUpper.includes("SDGI") || titleUpper.includes("SUNDER DEEP")) {
+    return "https://www.google.com/maps/dir/?api=1&destination=28.6738,77.4912";
+  }
+  if (titleUpper.includes("IMS")) {
+    return "https://www.google.com/maps/dir/?api=1&destination=28.6472,77.4526";
+  }
+  
+  const isDefaultCoords = !space.latitude || 
+    (Math.abs(space.latitude - 12.9716) < 0.05 && (titleUpper.includes("GHAZIABAD") || titleUpper.includes("DELHI") || titleUpper.includes("NOIDA") || titleUpper.includes("NCR")));
+    
+  if (isDefaultCoords) {
+    const searchQuery = encodeURIComponent(`${space.title} ${space.address || space.area || ''} ${space.city || ''}`.trim());
+    return `https://www.google.com/maps/dir/?api=1&destination=${searchQuery}`;
+  }
+  
+  return `https://www.google.com/maps/dir/?api=1&destination=${space.latitude},${space.longitude}`;
+}
+
 // Render Parking Spot Cards
 function renderSpots() {
   const filtered = getFilteredSpaces();
@@ -162,11 +185,7 @@ function renderSpots() {
   }
 
   spotsListContainer.innerHTML = filtered.map(space => {
-    const isDefaultCoords = !space.latitude || (Math.abs(space.latitude - 12.9716) < 0.001 && Math.abs(space.longitude - 77.5946) < 0.001);
-    const searchQuery = encodeURIComponent(`${space.title} ${space.address || space.area || ''} ${space.city || ''}`.trim());
-    const mapsUrl = isDefaultCoords 
-      ? `https://www.google.com/maps/dir/?api=1&destination=${searchQuery}` 
-      : `https://www.google.com/maps/dir/?api=1&destination=${space.latitude},${space.longitude}`;
+    const mapsUrl = getSmartMapsUrl(space);
     
     return `
       <div class="glass-card rounded-2xl p-4 transition hover:border-blue-500/40 hover:shadow-xl group" data-spot-id="${space.id}">
@@ -306,11 +325,7 @@ function updateHostDashboard() {
 // Open Booking Modal
 function openBookingModal(spot) {
   selectedSpotForBooking = spot;
-  const isDefaultCoords = !spot.latitude || (Math.abs(spot.latitude - 12.9716) < 0.001 && Math.abs(spot.longitude - 77.5946) < 0.001);
-  const searchQuery = encodeURIComponent(`${spot.title} ${spot.address || spot.area || ''} ${spot.city || ''}`.trim());
-  const mapsUrl = isDefaultCoords 
-    ? `https://www.google.com/maps/dir/?api=1&destination=${searchQuery}` 
-    : `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}`;
+  const mapsUrl = getSmartMapsUrl(spot);
 
   document.getElementById("bk-title").textContent = spot.title;
   document.getElementById("bk-address").textContent = `${spot.area}, ${spot.city}`;
@@ -352,6 +367,18 @@ async function publishNewSpace(e) {
   const newId = Date.now();
   const docRef = doc(db, "parking_spaces", String(newId));
 
+  const titleUpper = (title + " " + area + " " + city).toUpperCase();
+  let defaultLat = 12.9716 + (Math.random() - 0.5) * 0.05;
+  let defaultLng = 77.5946 + (Math.random() - 0.5) * 0.05;
+
+  if (titleUpper.includes("SDGI") || titleUpper.includes("SUNDER DEEP")) {
+    defaultLat = 28.6738;
+    defaultLng = 77.4912;
+  } else if (titleUpper.includes("IMS")) {
+    defaultLat = 28.6472;
+    defaultLng = 77.4526;
+  }
+
   const spaceData = {
     id: newId,
     title: title,
@@ -370,8 +397,8 @@ async function publishNewSpace(e) {
     reviewsCount: 1,
     status: "Active",
     verificationStatus: "Verified",
-    latitude: 12.9716 + (Math.random() - 0.5) * 0.05,
-    longitude: 77.5946 + (Math.random() - 0.5) * 0.05,
+    latitude: defaultLat,
+    longitude: defaultLng,
     parkingPhoto: "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=400&q=80",
     createdAt: Date.now()
   };
@@ -411,11 +438,7 @@ async function confirmBooking() {
     createdAt: Date.now()
   };
 
-  const isDefaultCoords = !selectedSpotForBooking.latitude || (Math.abs(selectedSpotForBooking.latitude - 12.9716) < 0.001 && Math.abs(selectedSpotForBooking.longitude - 77.5946) < 0.001);
-  const searchQuery = encodeURIComponent(`${selectedSpotForBooking.title} ${selectedSpotForBooking.address || selectedSpotForBooking.area || ''} ${selectedSpotForBooking.city || ''}`.trim());
-  const passMapsUrl = isDefaultCoords 
-    ? `https://www.google.com/maps/dir/?api=1&destination=${searchQuery}` 
-    : `https://www.google.com/maps/dir/?api=1&destination=${selectedSpotForBooking.latitude},${selectedSpotForBooking.longitude}`;
+  const passMapsUrl = getSmartMapsUrl(selectedSpotForBooking);
 
   try {
     await setDoc(doc(db, "bookings", bookingCode), bookingData);
