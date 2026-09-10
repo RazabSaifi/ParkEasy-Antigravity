@@ -5,36 +5,200 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Safe zone 66dp centered within 108dp: (21, 21) to (87, 87) -->
-    <!-- Location Pin Base Drop Shadow -->
+
+    <!-- Safe zone: 66dp centered circle (radius 33 at (54,54)) -->
+
+    <!-- Ambient Shadow Under 3D Ribbon 'P' -->
     <path
-        android:fillColor="#33000000"
-        android:pathData="M54,84c-1.5,0 -16,-17 -16,-28a16,16 0 1,1 32,0c0,11 -14.5,28 -16,28z" />
-    <!-- Gradient Location Pin -->
+        android:fillColor="#4D000000"
+        android:pathData="M37,67 C37,68.5 40,70 48,70 C57,70 76,64 76,46 C76,33 67,25 54,25 C45,25 37,28 37,34 Z" />
+
+    <!-- 1. Deep Inner Ribbon Fold (Shadow layer creating 3D depth) -->
     <path
-        android:pathData="M54,82c-1.5,0 -16,-17 -16,-28a16,16 0 1,1 32,0c0,11 -14.5,28 -16,28z">
+        android:pathData="M38,36 L52,36 C57,36 62,39 63,44 C61,46 54,50 47,52 L38,44 Z">
         <aapt:attr name="android:fillColor">
             <gradient
                 android:startX="38"
                 android:startY="36"
-                android:endX="70"
-                android:endY="82"
+                android:endX="63"
+                android:endY="52"
                 android:type="linear">
-                <item android:color="#2563EB" android:offset="0.0" />
-                <item android:color="#0D9488" android:offset="1.0" />
+                <item android:color="#0B132B" android:offset="0.0" />
+                <item android:color="#1A2D63" android:offset="0.6" />
+                <item android:color="#0F172A" android:offset="1.0" />
             </gradient>
         </aapt:attr>
     </path>
-    <!-- Inner White Circle -->
+
+    <!-- 2. Lower Vertical Stem with dynamic ribbon curve -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,54m-11,0a11,11 0 1,0 22,0a11,11 0 1,0 -22,0" />
-    <!-- Bold 'P' inside pin -->
+        android:pathData="M38,44 C38,44 43,48 48,53 C49,54 50,56 50,58 L50,65 C50,66.5 48.5,67 47,67 C42,67 38,62 38,55 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="38"
+                android:startY="44"
+                android:endX="50"
+                android:endY="67"
+                android:type="linear">
+                <item android:color="#0066FF" android:offset="0.0" />
+                <item android:color="#0052CC" android:offset="0.5" />
+                <item android:color="#003D99" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 3. Dynamic Fold Ribbon: Middle Swoop (from stem to loop) -->
     <path
-        android:fillColor="#1E3A8A"
-        android:pathData="M51,47h4.8c1.8,0 3.2,1.2 3.2,2.8s-1.4,2.8 -3.2,2.8H53.5v5.4H51V47z M53.5,50.6h2.2c0.7,0 1.2,-0.4 1.2,-1s-0.5,-1 -1.2,-1H53.5v2z" />
-    <!-- Small electric cyan indicator dot -->
+        android:pathData="M38,54 C38,48 41,41 46,36 C50,32 58,32 64,34 C69,36 71,40 70,44 C68,48 62,51 54,52 C48,53 42,54 38,54 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="38"
+                android:startY="32"
+                android:endX="70"
+                android:endY="54"
+                android:type="linear">
+                <item android:color="#0080FF" android:offset="0.0" />
+                <item android:color="#0066FF" android:offset="0.45" />
+                <item android:color="#0047BA" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 4. Front Diagonal Ribbon Face (Brightest forward loop) -->
     <path
-        android:fillColor="#00E5FF"
-        android:pathData="M63,44m-2.5,0a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0" />
+        android:pathData="M39,52 C41,44 46,37 54,34 C61,31 69,34 71,39 C72,43 69,48 64,50 C58,52 48,53 39,52 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="40"
+                android:startY="33"
+                android:endX="71"
+                android:endY="52"
+                android:type="linear">
+                <item android:color="#38BDF8" android:offset="0.0" />
+                <item android:color="#0091FF" android:offset="0.4" />
+                <item android:color="#0066FF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 5. Main Outer 3D Loop (Sweeping glossy arc) -->
+    <path
+        android:pathData="M39,24 C39,24 58,24 64,24 C72,24 75,29 75,36 C75,44 70,49 63,50 C58,51 52,50 48,48 C56,47 64,44 65,39 C66,35 63,32 58,32 L46,32 C42,32 39,29 39,24 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="39"
+                android:startY="24"
+                android:endX="75"
+                android:endY="48"
+                android:type="linear">
+                <item android:color="#60A5FA" android:offset="0.0" />
+                <item android:color="#0077FF" android:offset="0.3" />
+                <item android:color="#0055D4" android:offset="0.7" />
+                <item android:color="#003E9E" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 6. Top-Left Fold Tab (Iconic Origami flap) -->
+    <path
+        android:pathData="M39,24 L49,24 C49,24 49,32 46,34 C43,36 39,36 39,36 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="39"
+                android:startY="24"
+                android:endX="49"
+                android:endY="36"
+                android:type="linear">
+                <item android:color="#93C5FD" android:offset="0.0" />
+                <item android:color="#0080FF" android:offset="0.5" />
+                <item android:color="#0052CC" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 7. Specular Gloss Highlight Along Top Edge -->
+    <path
+        android:pathData="M40,24.5 L64,24.5 C70,24.5 73,28 73,34"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="40"
+                android:startY="24"
+                android:endX="73"
+                android:endY="34"
+                android:type="linear">
+                <item android:color="#E0F2FE" android:offset="0.0" />
+                <item android:color="#7DD3FC" android:offset="0.6" />
+                <item android:color="#00000000" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 8. Subtle Inner Fold Light Rim -->
+    <path
+        android:pathData="M42,52 C46,44 51,37 59,34"
+        android:strokeWidth="1.0"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="42"
+                android:startY="52"
+                android:endX="59"
+                android:endY="34"
+                android:type="linear">
+                <item android:color="#BAE6FD" android:offset="0.0" />
+                <item android:color="#38BDF8" android:offset="0.5" />
+                <item android:color="#00000000" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- ============================================== -->
+    <!-- Brand Typography "ParkEasy" matching reference -->
+    <!-- "Park" in White (#FFFFFF)                      -->
+    <!-- "Easy" in Electric Cyan (#00B4D8 / #0091FF)    -->
+    <!-- ============================================== -->
+
+    <group>
+        <!-- 'P' in Park -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M23,73 H26.4 C28.2,73 29.4,74 29.4,75.4 C29.4,76.8 28.2,77.8 26.4,77.8 H24.8 V81.5 H23 Z M24.8,76.5 H26.3 C27.2,76.5 27.7,76.1 27.7,75.4 C27.7,74.7 27.2,74.3 26.3,74.3 H24.8 Z" />
+
+        <!-- 'a' in Park -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M34.8,75.6 V81.5 H33.4 V80.5 C33,81.2 32.1,81.7 31.1,81.7 C29.6,81.7 28.6,80.7 28.6,79.2 C28.6,77.6 29.8,76.8 31.4,76.8 H33.3 V76.6 C33.3,75.8 32.7,75.3 31.8,75.3 C31,75.3 30.3,75.7 30.1,76.3 L28.9,75.8 C29.3,74.7 30.4,74.1 31.9,74.1 C33.7,74.1 34.8,74.9 34.8,75.6 Z M33.3,78.8 V77.9 H31.7 C30.8,77.9 30.1,78.3 30.1,79.1 C30.1,79.8 30.7,80.4 31.5,80.4 C32.5,80.4 33.3,79.7 33.3,78.8 Z" />
+
+        <!-- 'r' in Park -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M36.4,74.3 H37.8 V75.6 C38.3,74.6 39.2,74.2 40.2,74.3 L40,75.8 C39.1,75.7 38.3,76.2 38,77.1 V81.5 H36.4 Z" />
+
+        <!-- 'k' in Park -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M41.7,71.5 H43.3 V76.4 L46.2,74.3 H48.2 L45.2,76.9 L48.4,81.5 H46.3 L43.9,77.9 L43.3,78.4 V81.5 H41.7 Z" />
+
+        <!-- 'E' in Easy (Cyan) -->
+        <path
+            android:fillColor="#00A8FF"
+            android:pathData="M51.2,73 H56.8 V74.4 H52.9 V76.4 H56.3 V77.8 H52.9 V80.1 H57 V81.5 H51.2 Z" />
+
+        <!-- 'a' in Easy (Cyan) -->
+        <path
+            android:fillColor="#00A8FF"
+            android:pathData="M63.3,75.6 V81.5 H61.9 V80.5 C61.5,81.2 60.6,81.7 59.6,81.7 C58.1,81.7 57.1,80.7 57.1,79.2 C57.1,77.6 58.3,76.8 59.9,76.8 H61.8 V76.6 C61.8,75.8 61.2,75.3 60.3,75.3 C59.5,75.3 58.8,75.7 58.6,76.3 L57.4,75.8 C57.8,74.7 58.9,74.1 60.4,74.1 C62.2,74.1 63.3,74.9 63.3,75.6 Z M61.8,78.8 V77.9 H60.2 C59.3,77.9 58.6,78.3 58.6,79.1 C58.6,79.8 59.2,80.4 60,80.4 C61,80.4 61.8,79.7 61.8,78.8 Z" />
+
+        <!-- 's' in Easy (Cyan) -->
+        <path
+            android:fillColor="#00A8FF"
+            android:pathData="M64.7,80.1 L65.9,79.4 C66.5,80.2 67.2,80.6 68.1,80.6 C69,80.6 69.5,80.2 69.5,79.6 C69.5,79 69,78.7 67.9,78.3 C66.3,77.8 65.1,77.3 65.1,75.9 C65.1,74.8 66.1,74.1 67.6,74.1 C68.7,74.1 69.8,74.6 70.4,75.5 L69.3,76.3 C68.8,75.7 68.3,75.4 67.6,75.4 C66.8,75.4 66.4,75.7 66.4,76.1 C66.4,76.6 66.8,76.8 67.9,77.2 C69.6,77.7 70.8,78.3 70.8,79.6 C70.8,80.9 69.7,81.8 68,81.8 C66.7,81.8 65.4,81.2 64.7,80.1 Z" />
+
+        <!-- 'y' in Easy (Cyan) -->
+        <path
+            android:fillColor="#00A8FF"
+            android:pathData="M71.7,74.3 H73.3 L75.1,78.9 L76.8,74.3 H78.4 L75.9,80.8 C75.2,82.6 74.4,83.4 72.8,83.4 C72.2,83.4 71.7,83.3 71.3,83.1 L71.6,81.8 C72,81.9 72.3,82 72.8,82 C73.7,82 74.2,81.6 74.5,80.7 L74.7,80.1 Z" />
+    </group>
 </vector>

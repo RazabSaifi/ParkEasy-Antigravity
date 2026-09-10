@@ -70,6 +70,7 @@ import com.example.data.util.UserLocation
 import com.example.ui.FilterState
 import com.example.ui.components.InteractiveMapView
 import com.example.ui.components.ParkingCard
+import com.example.ui.i18n.LocalStrings
 import com.example.ui.theme.AccentEmerald
 import com.example.ui.theme.CharcoalBackground
 import com.example.ui.theme.CharcoalBorder
@@ -105,6 +106,7 @@ fun ExploreScreen(
     getDistanceString: ((ParkingSpace) -> String)? = null,
     getWalkingTimeString: ((ParkingSpace) -> String)? = null
 ) {
+    val strings = LocalStrings.current
     // On mobile, default to Map view matching Screen 2 of the visual reference
     var isMobileMapVisible by remember { mutableStateOf(true) }
     var showLocationDialog by remember { mutableStateOf(false) }
@@ -121,7 +123,7 @@ fun ExploreScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.MyLocation, contentDescription = null, tint = PrimaryBlue)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Select Location", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text(strings.chooseArea, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
             },
             text = {
@@ -279,7 +281,7 @@ fun ExploreScreen(
                                 OutlinedTextField(
                                     value = filterState.searchQuery,
                                     onValueChange = onSearchChange,
-                                    placeholder = { Text("Search location, area...", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                    placeholder = { Text(strings.searchPlaceholder, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) },
                                     colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = Color.Transparent,
                                         unfocusedBorderColor = Color.Transparent,
@@ -552,7 +554,7 @@ fun ExploreScreen(
                         },
                         text = {
                             Text(
-                                text = if (isMobileMapVisible) "List (${spaces.size})" else "Map View",
+                                text = if (isMobileMapVisible) "${strings.listView} (${spaces.size})" else strings.mapView,
                                 fontWeight = FontWeight.Bold
                             )
                         },
@@ -579,6 +581,7 @@ private fun ParkingListContent(
     getDistanceString: ((ParkingSpace) -> String)? = null,
     getWalkingTimeString: ((ParkingSpace) -> String)? = null
 ) {
+    val strings = LocalStrings.current
     if (spaces.isEmpty()) {
         // Empty State
         Column(
@@ -615,7 +618,7 @@ private fun ParkingListContent(
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.testTag("empty_expand_search_btn")
             ) {
-                Text("Expand Search Area")
+                Text(strings.clearFilters)
             }
         }
     } else {
@@ -626,7 +629,7 @@ private fun ParkingListContent(
         ) {
             item {
                 Text(
-                    text = "${spaces.size} parking spaces available nearby",
+                    text = "${spaces.size} ${strings.spotsAvailable}",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

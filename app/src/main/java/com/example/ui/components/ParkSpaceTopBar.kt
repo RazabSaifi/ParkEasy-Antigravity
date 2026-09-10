@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalParking
 import androidx.compose.material.icons.filled.Notifications
@@ -48,6 +49,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.i18n.AppLanguage
+import com.example.ui.i18n.LocalStrings
 import com.example.ui.theme.AccentEmerald
 import com.example.ui.theme.PrimaryBlue
 import com.example.ui.theme.Slate100
@@ -62,13 +65,16 @@ fun ParkSpaceTopBar(
     activeMode: String,
     unreadNotificationCount: Int,
     isDarkMode: Boolean = false,
+    currentLanguage: AppLanguage = AppLanguage.ENGLISH,
     onToggleDarkMode: () -> Unit = {},
+    onLanguageClick: () -> Unit = {},
     onModeChange: (String) -> Unit,
     onNotificationsClick: () -> Unit,
     onProfileClick: () -> Unit,
     onBrandClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val strings = LocalStrings.current
     var showModeMenu by remember { mutableStateOf(false) }
 
     Surface(
@@ -90,46 +96,54 @@ fun ParkSpaceTopBar(
                         .clickable(onClick = onBrandClick)
                         .testTag("brand_logo_button")
                 ) {
-                    if (activeMode == "Provider") {
-                        // In Provider mode, show [P] icon box + ParkEasy
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(PrimaryBlue)
-                        ) {
-                            Text(
-                                text = "P",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = "ParkEasy",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = (-0.5).sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    } else {
-                        // In Seeker mode, show clean ParkEasy text
-                        Text(
-                            text = "ParkEasy",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = (-0.8).sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+                    ParkEasyBrandBadge(size = 32.dp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "ParkEasy",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.5).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
 
                 // Actions on the right
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Language Switcher Button
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
+                        ),
+                        modifier = Modifier
+                            .clickable(onClick = onLanguageClick)
+                            .testTag("topbar_language_button")
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = strings.chooseLanguage,
+                                tint = PrimaryBlue,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = currentLanguage.shortBadge,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
                     // Dark / Light Mode Toggle Button (White <-> Dark)
                     IconButton(
                         onClick = onToggleDarkMode,
@@ -183,21 +197,21 @@ fun ParkSpaceTopBar(
                                 onDismissRequest = { showModeMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Seeker (Find Parking)") },
+                                    text = { Text(strings.seekerMode) },
                                     onClick = {
                                         onModeChange("Seeker")
                                         showModeMenu = false
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Provider (Host Spaces)") },
+                                    text = { Text(strings.providerMode) },
                                     onClick = {
                                         onModeChange("Provider")
                                         showModeMenu = false
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Admin Console") },
+                                    text = { Text(strings.adminMode) },
                                     onClick = {
                                         onModeChange("Admin")
                                         showModeMenu = false

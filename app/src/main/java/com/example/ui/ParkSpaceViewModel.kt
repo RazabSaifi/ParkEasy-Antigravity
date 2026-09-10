@@ -17,6 +17,7 @@ import com.example.data.repository.ParkSpaceRepository
 import com.example.data.util.GpsLocationProvider
 import com.example.data.util.LocationUtils
 import com.example.data.util.UserLocation
+import com.example.ui.i18n.AppLanguage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -108,6 +109,23 @@ class ParkSpaceViewModel(application: Application) : AndroidViewModel(applicatio
     fun toggleDarkMode(currentIsDark: Boolean? = null) {
         val current = currentIsDark ?: _darkModePreference.value ?: true
         setDarkMode(!current)
+    }
+
+    // App Language State (English, Hindi, Kannada, Tamil, Telugu, Spanish)
+    private val _appLanguage = MutableStateFlow(AppLanguage.ENGLISH)
+    val appLanguage: StateFlow<AppLanguage> = _appLanguage.asStateFlow()
+
+    fun setLanguage(language: AppLanguage) {
+        _appLanguage.value = language
+        val msg = when (language) {
+            AppLanguage.ENGLISH -> "Language switched to English 🇬🇧"
+            AppLanguage.HINDI -> "भाषा बदलकर हिन्दी कर दी गई है 🇮🇳"
+            AppLanguage.KANNADA -> "ಭಾಷೆಯನ್ನು ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿಸಲಾಗಿದೆ 🇮🇳"
+            AppLanguage.TAMIL -> "மொழி தமிழுக்கு மாற்றப்பட்டது 🇮🇳"
+            AppLanguage.TELUGU -> "భాష తెలుగుకు మార్చబడింది 🇮🇳"
+            AppLanguage.SPANISH -> "Idioma cambiado a Español 🇪🇸"
+        }
+        showMessage(msg)
     }
 
     // User Simulated GPS Location

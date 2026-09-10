@@ -58,6 +58,7 @@ import com.example.data.model.User
 import com.example.data.util.LocationUtils
 import com.example.data.util.UserLocation
 import com.example.ui.components.ParkingCard
+import com.example.ui.i18n.LocalStrings
 import com.example.ui.theme.AccentEmerald
 import com.example.ui.theme.PrimaryBlue
 import com.example.ui.theme.Slate100
@@ -87,17 +88,20 @@ fun HomeScreen(
     getDistanceString: ((ParkingSpace) -> String)? = null,
     getWalkingTimeString: ((ParkingSpace) -> String)? = null
 ) {
+    val strings = LocalStrings.current
     var query by remember { mutableStateOf("") }
     var showLocationDialog by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf("All") }
 
-    val filterPills = listOf(
-        "All",
-        "Covered",
-        "EV Charging",
-        "Under ₹50",
-        "24/7 Access"
-    )
+    val filterPills = remember(strings) {
+        listOf(
+            "All" to strings.categoryAll,
+            "Covered" to strings.categoryCovered,
+            "EV Charging" to strings.categoryEvCharging,
+            "Under ₹50" to strings.categoryUnder50,
+            "24/7 Access" to strings.category24x7
+        )
+    }
 
     if (showLocationDialog) {
         AlertDialog(
@@ -260,7 +264,7 @@ fun HomeScreen(
 
                 // Title: Where do you want to park?
                 Text(
-                    text = "Where do you want\nto park?",
+                    text = strings.whereToPark,
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-0.6).sp,
@@ -299,7 +303,7 @@ fun HomeScreen(
                             },
                             placeholder = {
                                 Text(
-                                    "Search destination or area...",
+                                    strings.searchPlaceholder,
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
@@ -347,15 +351,15 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Category Filter Pills: All, Covered, EV Charging, Under ₹50, 24/7 Access
+                // Category Filter Pills
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    filterPills.forEach { pill ->
-                        val isSelected = selectedCategory == pill
+                    filterPills.forEach { (categoryKey, categoryLabel) ->
+                        val isSelected = selectedCategory == categoryKey
                         Surface(
                             shape = RoundedCornerShape(20.dp),
                             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
@@ -365,13 +369,13 @@ fun HomeScreen(
                             ),
                             modifier = Modifier
                                 .clickable {
-                                    selectedCategory = pill
-                                    onSelectCategory(pill)
+                                    selectedCategory = categoryKey
+                                    onSelectCategory(categoryKey)
                                 }
-                                .testTag("filter_pill_$pill")
+                                .testTag("filter_pill_$categoryKey")
                         ) {
                             Text(
-                                text = pill,
+                                text = categoryLabel,
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                                 color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
@@ -393,7 +397,7 @@ fun HomeScreen(
                     .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 8.dp)
             ) {
                 Text(
-                    text = "Featured spots",
+                    text = strings.popularParkingSpots,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-0.3).sp
@@ -401,7 +405,7 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "See all",
+                    text = strings.viewAll,
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontWeight = FontWeight.SemiBold
                     ),

@@ -5,19 +5,47 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- Deep obsidian dark background with subtle blue undertone matching reference -->
     <path
         android:pathData="M0,0h108v108h-108z">
         <aapt:attr name="android:fillColor">
             <gradient
                 android:angle="315"
-                android:endColor="#1E3A8A"
-                android:startColor="#0F172A"
+                android:startColor="#050811"
+                android:centerColor="#0B1329"
+                android:endColor="#030712"
                 android:type="linear" />
         </aapt:attr>
     </path>
-    <!-- Subtle tech grid -->
+
+    <!-- Radial ambient glow behind the central emblem -->
     <path
-        android:pathData="M0,36h108 M0,72h108 M36,0v108 M72,0v108"
-        android:strokeWidth="0.5"
-        android:strokeColor="#1E293B" />
+        android:pathData="M54,52m-46,0a46,46 0 1,0 92,0a46,46 0 1,0 -92,0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerX="54"
+                android:centerY="48"
+                android:gradientRadius="44"
+                android:type="radial">
+                <item android:color="#350077FF" android:offset="0.0" />
+                <item android:color="#1A0055CC" android:offset="0.55" />
+                <item android:color="#00050811" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Soft squircle neon rim accent matching the uploaded reference -->
+    <path
+        android:pathData="M32,10 C18,10 10,18 10,32 L10,76 C10,90 18,98 32,98 L76,98 C90,98 98,90 98,76 L98,32 C98,18 90,10 76,10 Z"
+        android:strokeWidth="1.2">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:angle="135"
+                android:startColor="#6600B4D8"
+                android:centerColor="#1A0077B6"
+                android:endColor="#440096C7"
+                android:type="linear" />
+        </aapt:attr>
+    </path>
 </vector>

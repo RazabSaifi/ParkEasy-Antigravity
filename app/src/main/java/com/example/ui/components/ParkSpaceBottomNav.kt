@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.AppScreen
+import com.example.ui.i18n.LocalStrings
 import com.example.ui.theme.Slate100
 import com.example.ui.theme.Slate400
 import com.example.ui.theme.Slate500
@@ -53,28 +54,30 @@ fun ParkSpaceBottomNav(
     onNavigate: (AppScreen) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val strings = LocalStrings.current
+
     val items = if (activeMode == "Provider") {
         listOf(
-            NavItem(AppScreen.PROVIDER_DASHBOARD, "Home", Icons.Default.Home, "nav_provider_dashboard"),
-            NavItem(AppScreen.MY_SPACES, "Spaces", Icons.Default.LocalParking, "nav_provider_spaces"),
-            NavItem(AppScreen.MY_BOOKINGS, "Bookings", Icons.Default.EventNote, "nav_bookings"),
-            NavItem(AppScreen.EARNINGS, "Earnings", Icons.Default.AccountBalanceWallet, "nav_provider_earnings"),
-            NavItem(AppScreen.PROFILE, "Profile", Icons.Default.Person, "nav_profile")
+            NavItem(AppScreen.PROVIDER_DASHBOARD, strings.navHome, Icons.Default.Home, "nav_provider_dashboard"),
+            NavItem(AppScreen.MY_SPACES, strings.navSpaces, Icons.Default.LocalParking, "nav_provider_spaces"),
+            NavItem(AppScreen.MY_BOOKINGS, strings.navBookings, Icons.Default.EventNote, "nav_bookings"),
+            NavItem(AppScreen.EARNINGS, strings.navEarnings, Icons.Default.AccountBalanceWallet, "nav_provider_earnings"),
+            NavItem(AppScreen.PROFILE, strings.navProfile, Icons.Default.Person, "nav_profile")
         )
     } else if (activeMode == "Admin") {
         listOf(
-            NavItem(AppScreen.ADMIN_DASHBOARD, "Overview", Icons.Default.Dashboard, "nav_admin_dashboard"),
-            NavItem(AppScreen.EXPLORE, "All Spaces", Icons.Default.Explore, "nav_explore"),
-            NavItem(AppScreen.MY_BOOKINGS, "Bookings", Icons.Default.EventNote, "nav_bookings"),
-            NavItem(AppScreen.PROFILE, "Profile", Icons.Default.Person, "nav_profile")
+            NavItem(AppScreen.ADMIN_DASHBOARD, strings.navOverview, Icons.Default.Dashboard, "nav_admin_dashboard"),
+            NavItem(AppScreen.EXPLORE, strings.navExplore, Icons.Default.Explore, "nav_explore"),
+            NavItem(AppScreen.MY_BOOKINGS, strings.navBookings, Icons.Default.EventNote, "nav_bookings"),
+            NavItem(AppScreen.PROFILE, strings.navProfile, Icons.Default.Person, "nav_profile")
         )
     } else {
         listOf(
-            NavItem(AppScreen.HOME, "Home", Icons.Default.Home, "nav_home"),
-            NavItem(AppScreen.EXPLORE, "Explore", Icons.Default.Explore, "nav_explore"),
-            NavItem(AppScreen.MY_BOOKINGS, "Bookings", Icons.Default.EventNote, "nav_bookings"),
-            NavItem(AppScreen.LIST_SPACE_WIZARD, "List Space", Icons.Default.AddBox, "nav_list_space"),
-            NavItem(AppScreen.PROFILE, "Profile", Icons.Default.Person, "nav_profile")
+            NavItem(AppScreen.HOME, strings.navHome, Icons.Default.Home, "nav_home"),
+            NavItem(AppScreen.EXPLORE, strings.navExplore, Icons.Default.Explore, "nav_explore"),
+            NavItem(AppScreen.MY_BOOKINGS, strings.navBookings, Icons.Default.EventNote, "nav_bookings"),
+            NavItem(AppScreen.LIST_SPACE_WIZARD, strings.navListSpace, Icons.Default.AddBox, "nav_list_space"),
+            NavItem(AppScreen.PROFILE, strings.navProfile, Icons.Default.Person, "nav_profile")
         )
     }
 

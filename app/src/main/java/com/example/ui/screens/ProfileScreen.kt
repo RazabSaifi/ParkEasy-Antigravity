@@ -66,9 +66,13 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.User
 import com.example.data.model.Vehicle
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import com.example.ui.components.LanguageSelectionDialog
+import com.example.ui.i18n.AppLanguage
+import com.example.ui.i18n.LocalStrings
 import com.example.ui.theme.CharcoalBackground
 import com.example.ui.theme.CharcoalBorder
 import com.example.ui.theme.CharcoalElevated
@@ -95,17 +99,29 @@ fun ProfileScreen(
     onUpdateProfile: (name: String, phone: String, email: String) -> Unit = { _, _, _ -> },
     modifier: Modifier = Modifier,
     darkModePreference: Boolean? = null,
-    onToggleDarkMode: () -> Unit = {}
+    onToggleDarkMode: () -> Unit = {},
+    currentLanguage: AppLanguage = AppLanguage.ENGLISH,
+    onSelectLanguage: (AppLanguage) -> Unit = {}
 ) {
+    val strings = LocalStrings.current
     var showEditProfileDialog by remember { mutableStateOf(false) }
     var showAddVehicleDialog by remember { mutableStateOf(false) }
     var vehicleTypeInput by remember { mutableStateOf("Car") }
     var vehicleRegInput by remember { mutableStateOf("") }
     var vehicleModelInput by remember { mutableStateOf("") }
 
+    var showLanguageDialog by remember { mutableStateOf(false) }
     var showPolicyDialog by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
+
+    if (showLanguageDialog) {
+        LanguageSelectionDialog(
+            currentLanguage = currentLanguage,
+            onSelectLanguage = onSelectLanguage,
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
 
     val isDark = MaterialTheme.colorScheme.background == CharcoalBackground
 
@@ -572,6 +588,16 @@ fun ProfileScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), thickness = 1.dp)
 
                     ProfileSettingRow(
+                        icon = Icons.Default.Language,
+                        title = "${strings.appLanguageTitle} (${currentLanguage.nativeName})",
+                        subtitle = "${currentLanguage.flag} ${currentLanguage.nativeName} (${currentLanguage.englishName}) · Tap to change language",
+                        onClick = {
+                            showLanguageDialog = true
+                        }
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), thickness = 1.dp)
+
+                    ProfileSettingRow(
                         icon = Icons.Default.Person,
                         title = "Personal Information",
                         subtitle = "Tap to edit Name, Phone, Email & Contact details",
@@ -637,7 +663,31 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Brand & App Version Card
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                com.example.ui.components.ParkEasyBrandBadge(size = 40.dp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "ParkEasy v1.0.0",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Smart Community Parking Marketplace",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 

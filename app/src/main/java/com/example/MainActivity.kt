@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,9 +30,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.AppScreen
 import com.example.ui.ParkSpaceViewModel
 import com.example.ui.components.FilterSheet
+import com.example.ui.components.LanguageSelectionDialog
 import com.example.ui.components.NotificationDialog
 import com.example.ui.components.ParkSpaceBottomNav
 import com.example.ui.components.ParkSpaceTopBar
+import com.example.ui.i18n.LocalAppLanguage
+import com.example.ui.i18n.LocalStrings
+import com.example.ui.i18n.getAppStrings
 import com.example.ui.screens.AdminDashboardScreen
 import com.example.ui.screens.AvailabilityScreen
 import com.example.ui.screens.BookingFlowScreen
@@ -92,6 +97,10 @@ fun ParkSpaceApp(
     val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
     val isDark = darkModePreference ?: systemDark
 
+    val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
+    val strings = remember(appLanguage) { getAppStrings(appLanguage) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -139,41 +148,55 @@ fun ParkSpaceApp(
             currentScreen != AppScreen.DIGITAL_PASS &&
             currentScreen != AppScreen.LIST_SPACE_WIZARD
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            if (shouldShowTopBar) {
-                ParkSpaceTopBar(
-                    activeMode = activeMode,
-                    unreadNotificationCount = unreadNotificationsCount,
-                    isDarkMode = isDark,
-                    onToggleDarkMode = { viewModel.toggleDarkMode(isDark) },
-                    onModeChange = { mode -> viewModel.setMode(mode) },
-                    onNotificationsClick = { showNotificationDialog = true },
-                    onProfileClick = { viewModel.navigateTo(AppScreen.PROFILE) },
-                    onBrandClick = {
-                        if (activeMode == "Provider") {
-                            viewModel.navigateTo(AppScreen.PROVIDER_DASHBOARD)
-                        } else if (activeMode == "Admin") {
-                            viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD)
-                        } else {
-                            viewModel.navigateTo(AppScreen.HOME)
+    CompositionLocalProvider(
+        LocalStrings provides strings,
+        LocalAppLanguage provides appLanguage
+    ) {
+        if (showLanguageDialog) {
+            LanguageSelectionDialog(
+                currentLanguage = appLanguage,
+                onSelectLanguage = { viewModel.setLanguage(it) },
+                onDismiss = { showLanguageDialog = false }
+            )
+        }
+
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            topBar = {
+                if (shouldShowTopBar) {
+                    ParkSpaceTopBar(
+                        activeMode = activeMode,
+                        unreadNotificationCount = unreadNotificationsCount,
+                        isDarkMode = isDark,
+                        currentLanguage = appLanguage,
+                        onToggleDarkMode = { viewModel.toggleDarkMode(isDark) },
+                        onLanguageClick = { showLanguageDialog = true },
+                        onModeChange = { mode -> viewModel.setMode(mode) },
+                        onNotificationsClick = { showNotificationDialog = true },
+                        onProfileClick = { viewModel.navigateTo(AppScreen.PROFILE) },
+                        onBrandClick = {
+                            if (activeMode == "Provider") {
+                                viewModel.navigateTo(AppScreen.PROVIDER_DASHBOARD)
+                            } else if (activeMode == "Admin") {
+                                viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD)
+                            } else {
+                                viewModel.navigateTo(AppScreen.HOME)
+                            }
                         }
-                    }
-                )
-            }
-        },
-        bottomBar = {
-            if (shouldShowBottomNav) {
-                ParkSpaceBottomNav(
-                    activeMode = activeMode,
-                    currentScreen = currentScreen,
-                    onNavigate = { screen -> viewModel.navigateTo(screen) }
-                )
-            }
-        },
-        modifier = Modifier.fillMaxSize()
-    ) { innerPadding ->
+                    )
+                }
+            },
+            bottomBar = {
+                if (shouldShowBottomNav) {
+                    ParkSpaceBottomNav(
+                        activeMode = activeMode,
+                        currentScreen = currentScreen,
+                        onNavigate = { screen -> viewModel.navigateTo(screen) }
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -370,7 +393,9 @@ fun ParkSpaceApp(
                             onSubmitKyc = { viewModel.submitKycVerification() },
                             onUpdateProfile = { name, phone, email -> viewModel.updateUserProfile(name, phone, email) },
                             darkModePreference = darkModePreference,
-                            onToggleDarkMode = { viewModel.toggleDarkMode(isDark) }
+                            onToggleDarkMode = { viewModel.toggleDarkMode(isDark) },
+                            currentLanguage = appLanguage,
+                            onSelectLanguage = { viewModel.setLanguage(it) }
                         )
                     }
                     AppScreen.ADMIN_DASHBOARD -> {
@@ -412,4 +437,5 @@ fun ParkSpaceApp(
             }
         }
     }
+}
 }
