@@ -256,12 +256,27 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
+            <label class="block font-semibold text-slate-300 mb-1">State *</label>
+            <select id="space-state" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500 cursor-pointer">
+              <!-- States populated dynamically via app.js -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">City (Dependent) *</label>
+            <select id="space-city" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500 cursor-pointer">
+              <!-- Cities populated dynamically based on selected State -->
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
             <label class="block font-semibold text-slate-300 mb-1">Locality / Area *</label>
             <input type="text" id="space-area" required placeholder="e.g. Indiranagar" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
           </div>
           <div>
-            <label class="block font-semibold text-slate-300 mb-1">City *</label>
-            <input type="text" id="space-city" required value="Bengaluru" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
+            <label class="block font-semibold text-slate-300 mb-1">Pincode</label>
+            <input type="text" id="space-pincode" placeholder="e.g. 560038" class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500">
           </div>
         </div>
 
