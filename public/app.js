@@ -347,13 +347,55 @@ function updateBookingTotal() {
   document.getElementById("bk-total-amount").textContent = `₹${total}`;
 }
 
+// Indian States & Dependent Cities Dataset
+const indianLocationData = {
+  "Uttar Pradesh": ["Noida", "Ghaziabad", "Greater Noida", "Lucknow", "Kanpur", "Agra", "Varanasi", "Prayagraj", "Meerut", "Aligarh", "Bareilly", "Moradabad", "Gorakhpur", "Jhansi", "Mathura", "Ayodhya", "Muzaffarnagar", "Firozabad", "Noida Extension"],
+  "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi-Dharwad", "Belagavi", "Kalaburagi", "Davanagere", "Ballari", "Tumakuru", "Shivamogga", "Udupi", "Hassan"],
+  "Delhi (NCT)": ["New Delhi", "Central Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi", "Dwarka", "Rohini", "Connaught Place", "Saket", "Vasant Kunj"],
+  "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Chhatrapati Sambhajinagar", "Solapur", "Navi Mumbai", "Kalyan-Dombivli", "Amravati", "Kolhapur", "Pimpri-Chinchwad"],
+  "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Yamunanagar", "Rohtak", "Hisar", "Karnal", "Sonipat", "Panchkula"],
+  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tiruppur", "Erode", "Vellore", "Thoothukudi", "Tirunelveli"],
+  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam", "Mahbubnagar"],
+  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar", "Anand", "Vapi"],
+  "Rajasthan": ["Jaipur", "Jodhpur", "Kota", "Bikaner", "Ajmer", "Udaipur", "Bhilwara", "Alwar", "Sikar"],
+  "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Bardhaman", "Malda", "Kharagpur"],
+  "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Palakkad", "Kannur", "Alappuzha", "Kottayam"],
+  "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali", "Pathankot", "Hoshiarpur"],
+  "Madhya Pradesh": ["Bhopal", "Indore", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas", "Satna", "Ratlam", "Rewa"],
+  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Bihar Sharif", "Arrah", "Begusarai"]
+};
+
+// Initialize Dependent Location Selectors
+function initLocationSelectors() {
+  const stateSelect = document.getElementById("space-state");
+  const citySelectModal = document.getElementById("space-city");
+  if (!stateSelect || !citySelectModal) return;
+
+  stateSelect.innerHTML = Object.keys(indianLocationData).map(st => 
+    `<option value="${st}" ${st === "Karnataka" ? "selected" : ""}>📍 ${st}</option>`
+  ).join("");
+
+  function updateCitiesForState() {
+    const selectedState = stateSelect.value;
+    const cities = indianLocationData[selectedState] || ["Bengaluru"];
+    citySelectModal.innerHTML = cities.map(c => 
+      `<option value="${c}">🏢 ${c}</option>`
+    ).join("");
+  }
+
+  stateSelect.addEventListener("change", updateCitiesForState);
+  updateCitiesForState();
+}
+
 // Publish New Space to Firebase Cloud Firestore
 async function publishNewSpace(e) {
   e.preventDefault();
   
   const title = document.getElementById("space-title").value;
-  const area = document.getElementById("space-area").value;
+  const state = document.getElementById("space-state") ? document.getElementById("space-state").value : "Karnataka";
   const city = document.getElementById("space-city").value;
+  const area = document.getElementById("space-area").value;
+  const pincode = document.getElementById("space-pincode") ? document.getElementById("space-pincode").value : "";
   const address = document.getElementById("space-address").value;
   const price = parseFloat(document.getElementById("space-price").value);
   const capacity = parseInt(document.getElementById("space-capacity").value);
@@ -382,8 +424,10 @@ async function publishNewSpace(e) {
   const spaceData = {
     id: newId,
     title: title,
+    state: state,
     area: area,
     city: city,
+    pincode: pincode,
     address: address,
     hourlyPrice: price,
     vehicleCapacity: capacity,
@@ -405,7 +449,7 @@ async function publishNewSpace(e) {
 
   try {
     await setDoc(docRef, spaceData);
-    alert(`🎉 Success! '${title}' published live to Cloud Database.`);
+    alert(`🎉 Success! '${title}' in ${city}, ${state} published live to Cloud Database.`);
     modalListSpace.classList.add("hidden");
     document.getElementById("form-list-space").reset();
   } catch (err) {
@@ -507,18 +551,62 @@ function setupEventListeners() {
     });
   });
 
-  // Near Me GPS
+  // Near Me GPS & Auto Reverse Geocoding
   btnNearMe.addEventListener("click", () => {
     if (navigator.geolocation) {
+      btnNearMe.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Locating...`;
       navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         map.setView([lat, lng], 14);
         L.circle([lat, lng], { radius: 1000, color: '#059669', fillColor: '#059669', fillOpacity: 0.15 }).addTo(map);
+        btnNearMe.innerHTML = `<i class="fa-solid fa-location-crosshairs text-emerald-400"></i><span>GPS Near Me</span>`;
         alert(`📍 GPS Position Locked: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      }, (err) => {
+        btnNearMe.innerHTML = `<i class="fa-solid fa-location-crosshairs text-emerald-400"></i><span>GPS Near Me</span>`;
+        alert("Geolocation error: " + err.message);
       });
     }
   });
+
+  // GPS Auto Pinning in List My Space Modal
+  const btnGpsPinModal = document.getElementById("btn-gps-pin-modal");
+  if (btnGpsPinModal) {
+    btnGpsPinModal.addEventListener("click", () => {
+      const gpsStatus = document.getElementById("gps-pin-status");
+      if (navigator.geolocation) {
+        if (gpsStatus) gpsStatus.textContent = "Detecting GPS location & reverse geocoding...";
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          if (gpsStatus) gpsStatus.textContent = `Pinned: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          
+          try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await resp.json();
+            if (data && data.address) {
+              const stateName = data.address.state || "Karnataka";
+              const cityName = data.address.city || data.address.town || data.address.suburb || "Bengaluru";
+              const areaName = data.address.suburb || data.address.neighbourhood || data.address.residential || "";
+              const pincodeVal = data.address.postcode || "";
+
+              const stateSelect = document.getElementById("space-state");
+              if (stateSelect && indianLocationData[stateName]) {
+                stateSelect.value = stateName;
+                stateSelect.dispatchEvent(new Event("change"));
+              }
+              const citySelectModal = document.getElementById("space-city");
+              if (citySelectModal) citySelectModal.value = cityName;
+              if (areaName && document.getElementById("space-area")) document.getElementById("space-area").value = areaName;
+              if (pincodeVal && document.getElementById("space-pincode")) document.getElementById("space-pincode").value = pincodeVal;
+            }
+          } catch (e) {
+            console.log("Reverse geocode error:", e);
+          }
+        });
+      }
+    });
+  }
 
   // Modals Open / Close
   document.getElementById("btn-open-list-modal").addEventListener("click", () => modalListSpace.classList.remove("hidden"));
@@ -558,6 +646,7 @@ function setupEventListeners() {
 // App Initialization
 window.addEventListener("DOMContentLoaded", () => {
   initMap();
+  initLocationSelectors();
   setupRealtimeListeners();
   setupEventListeners();
 });

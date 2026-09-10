@@ -31,6 +31,7 @@ data class ParkingSpace(
     val address: String,
     val area: String,
     val city: String,
+    val state: String = "",
     val pincode: String,
     val latitude: Double,
     val longitude: Double,

@@ -54,9 +54,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ParkingSpace
-import com.example.data.model.User
+import com.example.data.util.IndianLocations
 import com.example.data.util.LocationUtils
 import com.example.data.util.UserLocation
+import com.example.ui.components.LocationSelectorTriggerButton
+import com.example.ui.components.SearchableLocationSelectorModal
 import com.example.ui.components.ParkingCard
 import com.example.ui.i18n.LocalStrings
 import com.example.ui.theme.AccentEmerald
@@ -93,6 +95,11 @@ fun HomeScreen(
     var showLocationDialog by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf("All") }
 
+    var homeState by remember { mutableStateOf(IndianLocations.findStateForCity(userLocation?.city ?: "Bengaluru") ?: "Karnataka") }
+    var homeCity by remember { mutableStateOf(userLocation?.city ?: "Bengaluru") }
+    var showHomeStatePicker by remember { mutableStateOf(false) }
+    var showHomeCityPicker by remember { mutableStateOf(false) }
+
     val filterPills = remember(strings) {
         listOf(
             "All" to strings.categoryAll,
@@ -111,7 +118,7 @@ fun HomeScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.MyLocation, contentDescription = null, tint = PrimaryBlue)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Select City / Area", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Select Location", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
             },
             text = {
@@ -146,7 +153,7 @@ fun HomeScreen(
                                     color = PrimaryBlue
                                 )
                                 Text(
-                                    text = "Find closest spots instantly",
+                                    text = "Detect State, City & Area instantly",
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -157,7 +164,40 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = "Or choose a Bengaluru area:",
+                        text = "Location Hierarchy (State → City):",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Dependent State & City Selectors
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        LocationSelectorTriggerButton(
+                            label = "State",
+                            selectedValue = homeState,
+                            placeholder = "Select State",
+                            onClick = { showHomeStatePicker = true },
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        LocationSelectorTriggerButton(
+                            label = "City",
+                            selectedValue = homeCity,
+                            placeholder = "Select City",
+                            onClick = { showHomeCityPicker = true },
+                            enabled = homeState.isNotBlank(),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = "Or choose a popular city/area:",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -170,14 +210,18 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    homeCity = loc.city
+                                    homeState = IndianLocations.findStateForCity(loc.city) ?: "Karnataka"
                                     onChangeLocation(loc)
                                     showLocationDialog = false
                                 }
-                                .padding(vertical = 8.dp)
+                                .padding(vertical = 6.dp)
                         ) {
                             RadioButton(
                                 selected = isCurrent,
                                 onClick = {
+                                    homeCity = loc.city
+                                    homeState = IndianLocations.findStateForCity(loc.city) ?: "Karnataka"
                                     onChangeLocation(loc)
                                     showLocationDialog = false
                                 }
@@ -205,6 +249,50 @@ fun HomeScreen(
                     Text("Done")
                 }
             }
+        )
+    }
+
+    if (showHomeStatePicker) {
+        SearchableLocationSelectorModal(
+            title = "Select State",
+            subtitle = "Country: India (🇮🇳)",
+            items = IndianLocations.getAllStates(),
+            selectedItem = homeState,
+            onItemSelected = { selectedState ->
+                homeState = selectedState
+                val cities = IndianLocations.getCitiesForState(selectedState)
+                if (!IndianLocations.isValidCityForState(selectedState, homeCity)) {
+                    homeCity = cities.firstOrNull() ?: ""
+                }
+            },
+            onDismiss = { showHomeStatePicker = false },
+            placeholderSearch = "Search state..."
+        )
+    }
+
+    if (showHomeCityPicker) {
+        val citiesInSelectedState = remember(homeState) {
+            IndianLocations.getCitiesForState(homeState)
+        }
+        SearchableLocationSelectorModal(
+            title = "Select City in $homeState",
+            subtitle = "Showing cities belonging to $homeState",
+            items = citiesInSelectedState,
+            selectedItem = homeCity,
+            onItemSelected = { selectedCity ->
+                homeCity = selectedCity
+                val newLoc = UserLocation(
+                    id = "custom_${selectedCity.lowercase()}",
+                    name = selectedCity,
+                    locality = selectedCity,
+                    city = selectedCity,
+                    latitude = if (selectedCity == "Noida" || selectedCity == "Ghaziabad") 28.6738 else 12.9716,
+                    longitude = if (selectedCity == "Noida" || selectedCity == "Ghaziabad") 77.4912 else 77.5946
+                )
+                onChangeLocation(newLoc)
+            },
+            onDismiss = { showHomeCityPicker = false },
+            placeholderSearch = "Search city in $homeState..."
         )
     }
 

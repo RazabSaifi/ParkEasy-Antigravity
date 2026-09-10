@@ -42,10 +42,10 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableDoubleStateOf
+import com.example.data.util.IndianLocations
 import com.example.data.util.UserLocation
+import com.example.ui.components.LocationSelectorTriggerButton
+import com.example.ui.components.SearchableLocationSelectorModal
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -103,23 +103,30 @@ fun ListMySpaceWizard(
     var step by remember { mutableIntStateOf(1) }
     val totalSteps = 10
 
-    // Form fields
+    // Form fields & Location Hierarchy
+    var state by remember { mutableStateOf("Karnataka") }
+    var city by remember { mutableStateOf("Bengaluru") }
+    var area by remember { mutableStateOf("") }
     var title by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var area by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("Bengaluru") }
     var pincode by remember { mutableStateOf("560038") }
-    var latitude by remember { mutableDoubleStateOf(userLocation?.latitude ?: 12.9716) }
-    var longitude by remember { mutableDoubleStateOf(userLocation?.longitude ?: 77.5946) }
+    var latitude by remember { androidx.compose.runtime.mutableDoubleStateOf(userLocation?.latitude ?: 12.9716) }
+    var longitude by remember { androidx.compose.runtime.mutableDoubleStateOf(userLocation?.longitude ?: 77.5946) }
     var isGpsPinned by remember { mutableStateOf(userLocation != null) }
 
-    LaunchedEffect(userLocation) {
+    var showStatePicker by remember { mutableStateOf(false) }
+    var showCityPicker by remember { mutableStateOf(false) }
+
+    androidx.compose.runtime.LaunchedEffect(userLocation) {
         if (userLocation != null) {
             latitude = userLocation.latitude
             longitude = userLocation.longitude
             if (address.isBlank()) address = userLocation.name
             if (area.isBlank()) area = userLocation.locality
-            if (city.isBlank() || city == "Bengaluru") city = userLocation.city
+            val resolvedCity = userLocation.city.ifBlank { "Bengaluru" }
+            val resolvedState = IndianLocations.findStateForCity(resolvedCity) ?: "Karnataka"
+            state = resolvedState
+            city = resolvedCity
             isGpsPinned = true
         }
     }
@@ -320,34 +327,92 @@ fun ListMySpaceWizard(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    OutlinedTextField(
-                        value = area,
-                        onValueChange = { area = it },
-                        label = { Text("Locality / Area") },
-                        placeholder = { Text("e.g. Indiranagar") },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = textFieldColors,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    // Location Hierarchy: State -> Dependent City
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // State Trigger
+                        LocationSelectorTriggerButton(
+                            label = "State",
+                            selectedValue = state,
+                            placeholder = "Select State",
+                            onClick = { showStatePicker = true },
+                            modifier = Modifier.weight(1f),
+                            testTag = "wizard_state_trigger"
+                        )
+
+                        // Dependent City Trigger
+                        LocationSelectorTriggerButton(
+                            label = "City",
+                            selectedValue = city,
+                            placeholder = "Select City",
+                            onClick = { showCityPicker = true },
+                            enabled = state.isNotBlank(),
+                            modifier = Modifier.weight(1f),
+                            testTag = "wizard_city_trigger"
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         OutlinedTextField(
-                            value = city,
-                            onValueChange = { city = it },
-                            label = { Text("City") },
+                            value = area,
+                            onValueChange = { area = it },
+                            label = { Text("Locality / Area") },
+                            placeholder = { Text("e.g. Indiranagar") },
                             shape = RoundedCornerShape(12.dp),
                             colors = textFieldColors,
                             modifier = Modifier.weight(1.2f)
                         )
-                        Spacer(modifier = Modifier.width(10.dp))
                         OutlinedTextField(
                             value = pincode,
                             onValueChange = { pincode = it },
                             label = { Text("Pincode") },
+                            placeholder = { Text("560038") },
                             shape = RoundedCornerShape(12.dp),
                             colors = textFieldColors,
                             modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    // Modals for State & City Selection
+                    if (showStatePicker) {
+                        SearchableLocationSelectorModal(
+                            title = "Select State",
+                            subtitle = "Country: India (🇮🇳)",
+                            items = IndianLocations.getAllStates(),
+                            selectedItem = state,
+                            onItemSelected = { selectedState ->
+                                state = selectedState
+                                val validCities = IndianLocations.getCitiesForState(selectedState)
+                                if (!IndianLocations.isValidCityForState(selectedState, city)) {
+                                    city = validCities.firstOrNull() ?: ""
+                                }
+                            },
+                            onDismiss = { showStatePicker = false },
+                            placeholderSearch = "Search state (e.g. Uttar Pradesh, Karnataka...)"
+                        )
+                    }
+
+                    if (showCityPicker) {
+                        val citiesInSelectedState = remember(state) {
+                            IndianLocations.getCitiesForState(state)
+                        }
+                        SearchableLocationSelectorModal(
+                            title = "Select City in $state",
+                            subtitle = "Showing cities belonging to $state",
+                            items = citiesInSelectedState,
+                            selectedItem = city,
+                            onItemSelected = { selectedCity ->
+                                city = selectedCity
+                            },
+                            onDismiss = { showCityPicker = false },
+                            placeholderSearch = "Search city in $state..."
                         )
                     }
 
