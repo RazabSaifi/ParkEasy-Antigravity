@@ -162,7 +162,11 @@ function renderSpots() {
   }
 
   spotsListContainer.innerHTML = filtered.map(space => {
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${space.latitude},${space.longitude}`;
+    const isDefaultCoords = !space.latitude || (Math.abs(space.latitude - 12.9716) < 0.001 && Math.abs(space.longitude - 77.5946) < 0.001);
+    const searchQuery = encodeURIComponent(`${space.title} ${space.address || space.area || ''} ${space.city || ''}`.trim());
+    const mapsUrl = isDefaultCoords 
+      ? `https://www.google.com/maps/dir/?api=1&destination=${searchQuery}` 
+      : `https://www.google.com/maps/dir/?api=1&destination=${space.latitude},${space.longitude}`;
     
     return `
       <div class="glass-card rounded-2xl p-4 transition hover:border-blue-500/40 hover:shadow-xl group" data-spot-id="${space.id}">
@@ -177,7 +181,7 @@ function renderSpots() {
           <div class="flex-1 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between">
-                <h3 class="font-bold text-white text-sm group-hover:text-blue-400 transition">${space.title}</h3>
+                <a href="${mapsUrl}" target="_blank" class="font-bold text-white text-sm hover:text-blue-400 transition" title="Click to view navigation on Google Maps">${space.title}</a>
                 <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">Verified</span>
               </div>
               <p class="text-xs text-slate-400 mt-0.5">${space.area}, ${space.city}</p>
@@ -199,7 +203,7 @@ function renderSpots() {
 
               <div class="flex items-center gap-2">
                 <!-- Direct Google Maps Navigation -->
-                <a href="${mapsUrl}" target="_blank" title="Navigate in Google Maps" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 flex items-center justify-center transition border border-slate-700">
+                <a href="${mapsUrl}" target="_blank" title="Navigate to ${space.title} in Google Maps" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 flex items-center justify-center transition border border-slate-700">
                   <i class="fa-solid fa-location-arrow text-xs"></i>
                 </a>
 
@@ -236,6 +240,12 @@ function renderMapMarkers() {
   const filtered = getFilteredSpaces();
 
   filtered.forEach(space => {
+    const isDefaultCoords = !space.latitude || (Math.abs(space.latitude - 12.9716) < 0.001 && Math.abs(space.longitude - 77.5946) < 0.001);
+    const searchQuery = encodeURIComponent(`${space.title} ${space.address || space.area || ''} ${space.city || ''}`.trim());
+    const mapsUrl = isDefaultCoords 
+      ? `https://www.google.com/maps/dir/?api=1&destination=${searchQuery}` 
+      : `https://www.google.com/maps/dir/?api=1&destination=${space.latitude},${space.longitude}`;
+
     const pinHtml = `
       <div class="custom-map-pin">
         <span>₹${space.hourlyPrice}</span>
@@ -256,7 +266,7 @@ function renderMapMarkers() {
       <div class="p-2 text-xs">
         <div class="font-bold text-white text-sm mb-1">${space.title}</div>
         <div class="text-slate-300 mb-2">${space.area}, ${space.city} • ₹${space.hourlyPrice}/hr</div>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${space.latitude},${space.longitude}" target="_blank" class="inline-block px-3 py-1 bg-blue-600 text-white font-bold rounded-lg text-center w-full">
+        <a href="${mapsUrl}" target="_blank" class="inline-block px-3 py-1 bg-blue-600 text-white font-bold rounded-lg text-center w-full">
           🧭 Google Maps Directions
         </a>
       </div>
@@ -296,10 +306,21 @@ function updateHostDashboard() {
 // Open Booking Modal
 function openBookingModal(spot) {
   selectedSpotForBooking = spot;
+  const isDefaultCoords = !spot.latitude || (Math.abs(spot.latitude - 12.9716) < 0.001 && Math.abs(spot.longitude - 77.5946) < 0.001);
+  const searchQuery = encodeURIComponent(`${spot.title} ${spot.address || spot.area || ''} ${spot.city || ''}`.trim());
+  const mapsUrl = isDefaultCoords 
+    ? `https://www.google.com/maps/dir/?api=1&destination=${searchQuery}` 
+    : `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}`;
+
   document.getElementById("bk-title").textContent = spot.title;
   document.getElementById("bk-address").textContent = `${spot.area}, ${spot.city}`;
   document.getElementById("bk-price").textContent = `₹${spot.hourlyPrice} / hour`;
   
+  const btnDirections = document.getElementById("bk-directions-btn");
+  if (btnDirections) {
+    btnDirections.href = mapsUrl;
+  }
+
   updateBookingTotal();
   modalBooking.classList.remove("hidden");
 }
@@ -390,6 +411,12 @@ async function confirmBooking() {
     createdAt: Date.now()
   };
 
+  const isDefaultCoords = !selectedSpotForBooking.latitude || (Math.abs(selectedSpotForBooking.latitude - 12.9716) < 0.001 && Math.abs(selectedSpotForBooking.longitude - 77.5946) < 0.001);
+  const searchQuery = encodeURIComponent(`${selectedSpotForBooking.title} ${selectedSpotForBooking.address || selectedSpotForBooking.area || ''} ${selectedSpotForBooking.city || ''}`.trim());
+  const passMapsUrl = isDefaultCoords 
+    ? `https://www.google.com/maps/dir/?api=1&destination=${searchQuery}` 
+    : `https://www.google.com/maps/dir/?api=1&destination=${selectedSpotForBooking.latitude},${selectedSpotForBooking.longitude}`;
+
   try {
     await setDoc(doc(db, "bookings", bookingCode), bookingData);
     modalBooking.classList.add("hidden");
@@ -400,6 +427,11 @@ async function confirmBooking() {
     document.getElementById("pass-time").textContent = `Valid Today • ${hours} Hours • ${upiApp}`;
     document.getElementById("pass-reg").textContent = `Vehicle: ${regNo.toUpperCase()}`;
     
+    const passMapsBtn = document.getElementById("pass-maps-btn");
+    if (passMapsBtn) {
+      passMapsBtn.href = passMapsUrl;
+    }
+
     // Generate QR
     const qrContainer = document.getElementById("qrcode-container");
     qrContainer.innerHTML = "";

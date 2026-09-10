@@ -282,12 +282,13 @@ fun ParkingCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = {
-                            LocationUtils.openGoogleMaps(
-                                context = context,
-                                lat = space.latitude,
-                                lng = space.longitude,
-                                label = space.title
-                            )
+                    LocationUtils.openGoogleMaps(
+                        context = context,
+                        lat = space.latitude,
+                        lng = space.longitude,
+                        label = space.title,
+                        address = space.address.ifEmpty { "${space.area}, ${space.city}" }
+                    )
                         },
                         modifier = Modifier
                             .size(32.dp)
@@ -456,7 +457,8 @@ fun CompactParkingCard(
                         context = compactContext,
                         lat = space.latitude,
                         lng = space.longitude,
-                        label = space.title
+                        label = space.title,
+                        address = space.address.ifEmpty { "${space.area}, ${space.city}" }
                     )
                 },
                 modifier = Modifier

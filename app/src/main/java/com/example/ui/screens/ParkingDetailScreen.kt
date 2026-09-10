@@ -421,7 +421,8 @@ fun ParkingDetailScreen(
                                 context = context,
                                 lat = space.latitude,
                                 lng = space.longitude,
-                                label = space.title
+                                label = space.title,
+                                address = space.address.ifEmpty { "${space.area}, ${space.city}" }
                             )
                         },
                         shape = RoundedCornerShape(10.dp),

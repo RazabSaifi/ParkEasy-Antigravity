@@ -118,8 +118,32 @@ object LocationUtils {
 
     /**
      * Opens Google Maps for turnkey turn-by-turn navigation or searching the specific parking location.
+     * Automatically handles exact GPS coordinates or falls back to searching by spot title & address (e.g. SDGI, IMS).
      */
-    fun openGoogleMaps(context: android.content.Context, lat: Double, lng: Double, label: String = "Parking Space") {
+    fun openGoogleMaps(
+        context: android.content.Context,
+        lat: Double,
+        lng: Double,
+        label: String = "Parking Space",
+        address: String = ""
+    ) {
+        val isDefaultCoords = (lat == 0.0 && lng == 0.0) || (Math.abs(lat - 12.9716) < 0.001 && Math.abs(lng - 77.5946) < 0.001)
+        val searchQuery = if (label.isNotBlank()) {
+            if (address.isNotBlank() && !address.contains(label, ignoreCase = true)) "$label, $address" else label
+        } else {
+            "$lat,$lng"
+        }
+
+        if (isDefaultCoords && label.isNotBlank()) {
+            val encodedQuery = android.net.Uri.encode(searchQuery)
+            val webUri = android.net.Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$encodedQuery")
+            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, webUri)
+            try {
+                context.startActivity(intent)
+                return
+            } catch (ignored: Exception) {}
+        }
+
         val uri = android.net.Uri.parse("google.navigation:q=$lat,$lng&mode=d")
         val mapIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
             setPackage("com.google.android.apps.maps")
@@ -127,8 +151,8 @@ object LocationUtils {
         try {
             context.startActivity(mapIntent)
         } catch (e: Exception) {
-            // Fallback to standard geo intent or web Google Maps
-            val fallbackUri = android.net.Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lng")
+            val fallbackQuery = android.net.Uri.encode(searchQuery)
+            val fallbackUri = android.net.Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$fallbackQuery")
             try {
                 context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, fallbackUri))
             } catch (ignored: Exception) {}
