@@ -1,44 +1,137 @@
-/* ParkEasy Editorial Glassmorphism & Modern Web Design System */
+/* ParkEasy — Ultra-Premium Google Stitch AI Design System */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --primary-blue: #2563eb;
-  --primary-hover: #1d4ed8;
-  --accent-emerald: #059669;
-  --accent-amber: #f59e0b;
-  --slate-900: #0f172a;
-  --slate-800: #1e293b;
-  --slate-700: #334155;
-  --slate-600: #475569;
-  --slate-500: #64748b;
-  --slate-400: #94a3b8;
-  --slate-200: #e2e8f0;
-  --slate-100: #f1f5f9;
-  --slate-50: #f8fafc;
+  --stitch-bg-dark: #090d16;
+  --stitch-card-bg: rgba(15, 23, 42, 0.65);
+  --stitch-glass-border: rgba(255, 255, 255, 0.08);
+  --stitch-accent-blue: #3b82f6;
+  --stitch-accent-indigo: #6366f1;
+  --stitch-accent-purple: #8b5cf6;
+  --stitch-accent-emerald: #10b981;
+  --stitch-accent-amber: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--slate-900);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--stitch-bg-dark);
   color: #f8fafc;
   overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
 }
 
-/* Glassmorphism Surface */
+/* Dynamic Ambient Glow Mesh Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: -10%;
+  left: 15%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 50%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: floatOrb 12s ease-in-out infinite alternate;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -5%;
+  right: 10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.06) 50%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+  animation: floatOrb2 16s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, 30px) scale(1.1); }
+}
+
+@keyframes floatOrb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-30px, -40px) scale(1.15); }
+}
+
+/* Gradient Text Helper */
+.gradient-text {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-brand {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
+/* Glassmorphism Cards & Panels */
 .glass-card {
-  background: rgba(30, 41, 59, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
 }
 
 .glass-nav {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(9, 13, 22, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-input {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  border-color: rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+/* Filter Pill Buttons */
+.filter-pill {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.filter-pill.active {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  color: #ffffff;
+  border-color: rgba(147, 197, 253, 0.3);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.filter-pill:not(.active):hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 /* Custom Scrollbar */
@@ -48,73 +141,117 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(9, 13, 22, 0.6);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.25);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(37, 99, 235, 0.6);
+  background: rgba(59, 130, 246, 0.6);
 }
 
-/* Custom Map Popup Styling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Map Marker Styling */
+.custom-map-pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 12px;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.6), 0 0 0 2px rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.custom-map-pin:hover, .custom-map-pin.selected {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.7), 0 0 0 2px rgba(255, 255, 255, 1);
+  transform: scale(1.12);
+}
+
+/* Leaflet Overrides */
+.leaflet-container {
+  font-family: inherit !important;
+  background: #0b1120 !important;
+}
+
 .leaflet-popup-content-wrapper {
-  background: rgba(30, 41, 59, 0.95) !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  backdrop-filter: blur(16px) !important;
   color: #fff !important;
-  border-radius: 14px !important;
+  border-radius: 16px !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
   padding: 4px !important;
 }
 
 .leaflet-popup-tip {
-  background: rgba(30, 41, 59, 0.95) !important;
+  background: rgba(15, 23, 42, 0.95) !important;
 }
 
-/* Badge Pulse Animation */
+/* Glowing Pulsing Badge */
 @keyframes pulse-ring {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 0.4; }
-  100% { transform: scale(0.95); opacity: 0.8; }
+  0% { transform: scale(0.95); opacity: 0.9; }
+  50% { transform: scale(1.25); opacity: 0.4; }
+  100% { transform: scale(0.95); opacity: 0.9; }
 }
 
-.pulse-badge {
-  animation: pulse-ring 2.5s infinite ease-in-out;
+.pulse-ring {
+  animation: pulse-ring 2.2s infinite ease-in-out;
 }
 
-/* Shimmer Loading Effect */
+/* Shimmer Loading Skeleton */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
 .skeleton-loader {
-  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.15) 37%, rgba(255,255,255,0.05) 63%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.1) 37%, rgba(255,255,255,0.03) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
 }
 
-/* Custom Marker Styling */
-.custom-map-pin {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #2563eb;
+/* Button Glow Effects */
+.btn-stitch-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
   color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 12px;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5);
-  border: 2px solid #ffffff;
-  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+  transition: all 0.2s ease;
 }
 
-.custom-map-pin.selected {
-  background: #059669;
-  box-shadow: 0 4px 18px rgba(5, 150, 105, 0.7);
-  transform: scale(1.1);
+.btn-stitch-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 100%);
+  box-shadow: 0 6px 22px rgba(37, 99, 235, 0.5);
+  transform: translateY(-1px);
 }
+
+.btn-stitch-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-stitch-emerald:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 6px 22px rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}
+
