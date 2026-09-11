@@ -175,10 +175,10 @@ function renderSpots() {
 
   if (filtered.length === 0) {
     spotsListContainer.innerHTML = `
-      <div class="glass-card rounded-2xl p-8 text-center text-slate-400">
-        <i class="fa-solid fa-magnifying-glass text-3xl mb-3 text-slate-500"></i>
-        <h4 class="text-white font-bold text-base mb-1">No parking spaces found</h4>
-        <p class="text-xs">Try selecting "All Cities" or clearing search query.</p>
+      <div class="glass-card rounded-3xl p-8 text-center text-slate-400">
+        <i class="fa-solid fa-magnifying-glass text-3xl mb-3 text-blue-400"></i>
+        <h4 class="text-white font-extrabold text-base mb-1">No parking spaces found</h4>
+        <p class="text-xs text-slate-400">Try selecting "All Cities" or clearing search query.</p>
       </div>
     `;
     return;
@@ -188,47 +188,69 @@ function renderSpots() {
     const mapsUrl = getSmartMapsUrl(space);
     
     return `
-      <div class="glass-card rounded-2xl p-4 transition hover:border-blue-500/40 hover:shadow-xl group" data-spot-id="${space.id}">
+      <div class="glass-card glass-card-hover rounded-3xl p-4 transition-all duration-300 group" data-spot-id="${space.id}">
         <div class="flex gap-4">
-          <!-- Thumbnail -->
-          <div class="w-24 h-24 rounded-xl overflow-hidden bg-slate-800 shrink-0 relative">
-            <img src="${space.parkingPhoto}" alt="${space.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            ${space.hasEvCharging ? '<span class="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-emerald-500 text-white text-[10px] font-bold">EV</span>' : ''}
+          <!-- Image Thumbnail with Overlays -->
+          <div class="w-28 h-28 rounded-2xl overflow-hidden bg-slate-900 shrink-0 relative border border-white/10 shadow-lg">
+            <img src="${space.parkingPhoto}" alt="${space.title}" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500">
+            
+            ${space.hasEvCharging ? `
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-emerald-500/90 text-white text-[10px] font-black tracking-wide shadow-md backdrop-blur-md">
+                ⚡ EV
+              </span>
+            ` : ''}
+
+            <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-slate-950/80 text-amber-400 text-[10px] font-bold backdrop-blur-md border border-amber-500/30">
+              ★ ${space.rating || 4.8}
+            </span>
           </div>
 
-          <!-- Content -->
+          <!-- Spot Information -->
           <div class="flex-1 flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between">
-                <a href="${mapsUrl}" target="_blank" class="font-bold text-white text-sm hover:text-blue-400 transition" title="Click to view navigation on Google Maps">${space.title}</a>
-                <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">Verified</span>
+              <div class="flex items-center justify-between gap-2">
+                <a href="${mapsUrl}" target="_blank" class="font-extrabold text-white text-sm hover:text-blue-400 transition-colors line-clamp-1" title="Click to view navigation on Google Maps">
+                  ${space.title}
+                </a>
+                <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Verified
+                </span>
               </div>
-              <p class="text-xs text-slate-400 mt-0.5">${space.area}, ${space.city}</p>
+              <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                <i class="fa-solid fa-location-dot text-blue-400 text-[11px]"></i>
+                <span>${space.area}, ${space.city}</span>
+              </p>
             </div>
 
-            <!-- Rating & Distance -->
-            <div class="flex items-center gap-2 text-xs text-slate-300">
-              <span class="text-amber-400 font-bold"><i class="fa-solid fa-star"></i> ${space.rating}</span>
-              <span class="text-slate-600">•</span>
-              <span class="text-slate-400">${space.isCovered ? 'Covered Roof' : 'Open Surface'}</span>
+            <!-- Features Row -->
+            <div class="flex items-center gap-2 text-[11px] text-slate-300 mt-2">
+              <span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 font-medium">
+                ${space.isCovered ? '🚘 Covered' : '☀️ Open Surface'}
+              </span>
+              ${space.hasCctv ? `
+                <span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 font-medium">
+                  📹 CCTV
+                </span>
+              ` : ''}
             </div>
 
-            <!-- Price & Actions -->
-            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800">
+            <!-- Price & Navigation/Booking Controls -->
+            <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-800/80">
               <div>
-                <span class="text-lg font-black text-white">₹${space.hourlyPrice}</span>
-                <span class="text-xs text-slate-400">/hr</span>
+                <span class="text-xl font-black text-white">₹${space.hourlyPrice}</span>
+                <span class="text-xs text-slate-400 font-semibold">/hr</span>
               </div>
 
               <div class="flex items-center gap-2">
-                <!-- Direct Google Maps Navigation -->
-                <a href="${mapsUrl}" target="_blank" title="Navigate to ${space.title} in Google Maps" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 flex items-center justify-center transition border border-slate-700">
+                <!-- Direct Google Maps Navigation Button -->
+                <a href="${mapsUrl}" target="_blank" title="Navigate to ${space.title} in Google Maps" class="w-9 h-9 rounded-xl bg-slate-900 hover:bg-blue-600/20 text-blue-400 flex items-center justify-center transition border border-slate-800 hover:border-blue-500/40">
                   <i class="fa-solid fa-location-arrow text-xs"></i>
                 </a>
 
-                <!-- Reserve Pass -->
-                <button class="btn-book-spot px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-md shadow-blue-600/30" data-id="${space.id}">
-                  Book
+                <!-- Reserve Digital Pass Button -->
+                <button class="btn-book-spot btn-stitch-primary px-4 py-2 rounded-xl text-xs font-black shadow-lg" data-id="${space.id}">
+                  Reserve
                 </button>
               </div>
             </div>
@@ -280,13 +302,19 @@ function renderMapMarkers() {
 
     const marker = L.marker([space.latitude, space.longitude], { icon: icon }).addTo(map);
     
-    // Popup
+    // Popup Content
     const popupContent = `
-      <div class="p-2 text-xs">
-        <div class="font-bold text-white text-sm mb-1">${space.title}</div>
-        <div class="text-slate-300 mb-2">${space.area}, ${space.city} • ₹${space.hourlyPrice}/hr</div>
-        <a href="${mapsUrl}" target="_blank" class="inline-block px-3 py-1 bg-blue-600 text-white font-bold rounded-lg text-center w-full">
-          🧭 Google Maps Directions
+      <div class="p-3 text-xs space-y-2">
+        <div class="font-extrabold text-white text-sm line-clamp-1">${space.title}</div>
+        <div class="text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-location-dot text-blue-400"></i> ${space.area}, ${space.city}
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-emerald-400 font-black text-sm">₹${space.hourlyPrice} <span class="text-[10px] text-slate-400 font-normal">/hr</span></span>
+          <span class="text-amber-400 font-bold">★ ${space.rating || 4.8}</span>
+        </div>
+        <a href="${mapsUrl}" target="_blank" class="block w-full py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl text-center shadow-md transition">
+          🧭 Navigate Google Maps
         </a>
       </div>
     `;
