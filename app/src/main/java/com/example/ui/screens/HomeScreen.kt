@@ -363,11 +363,11 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Search Bar with Tune icon
+                // Search Bar with Filter Icon
                 Surface(
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(18.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("home_search_bar")
@@ -379,7 +379,7 @@ fun HomeScreen(
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = PrimaryBlue,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -392,8 +392,8 @@ fun HomeScreen(
                             placeholder = {
                                 Text(
                                     strings.searchPlaceholder,
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                 )
                             },
                             colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
@@ -430,7 +430,7 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Tune,
                                 contentDescription = "Filters",
-                                tint = MaterialTheme.colorScheme.onSurface,
+                                tint = PrimaryBlue,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -450,24 +450,24 @@ fun HomeScreen(
                         val isSelected = selectedCategory == categoryKey
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                            color = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant,
                             border = BorderStroke(
                                 1.dp,
-                                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                                if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                             ),
                             modifier = Modifier
                                 .clickable {
                                     selectedCategory = categoryKey
                                     onSelectCategory(categoryKey)
                                 }
-                                .testTag("filter_pill_$categoryKey")
+                                .testTag("home_filter_pill_$categoryKey")
                         ) {
                             Text(
                                 text = categoryLabel,
                                 fontSize = 12.sp,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                 color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                             )
                         }
                     }

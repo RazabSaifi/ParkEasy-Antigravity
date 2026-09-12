@@ -85,22 +85,23 @@ fun LandingScreen(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
-        // Hero Section with Clean Light Aesthetics
+        // Hero Section with Obsidian Glass Aesthetics
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(20.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // Trust Tag
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFFEFF6FF)
+                    color = PrimaryBlue.copy(alpha = 0.15f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, PrimaryBlue.copy(alpha = 0.3f))
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
@@ -113,7 +114,7 @@ fun LandingScreen(
                             text = "India's Community Parking Marketplace",
                             color = PrimaryBlue,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -128,7 +129,7 @@ fun LandingScreen(
                         letterSpacing = (-0.5).sp,
                         lineHeight = 36.sp
                     ),
-                    color = Slate900
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -137,7 +138,7 @@ fun LandingScreen(
                 Text(
                     text = "Discover verified parking spaces near your destination and book your spot in advance.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Slate600,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 22.sp
                 )
 
@@ -147,11 +148,11 @@ fun LandingScreen(
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Button(
                         onClick = onFindParking,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
                         modifier = Modifier
                             .weight(1.2f)
-                            .height(50.dp)
+                            .height(52.dp)
                             .testTag("landing_find_parking_button")
                     ) {
                         Icon(Icons.Default.Explore, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -161,15 +162,17 @@ fun LandingScreen(
                     Spacer(modifier = Modifier.width(10.dp))
                     OutlinedButton(
                         onClick = onListSpace,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         modifier = Modifier
                             .weight(1f)
-                            .height(50.dp)
+                            .height(52.dp)
                             .testTag("landing_list_space_button")
                     ) {
-                        Icon(Icons.Default.AddBusiness, contentDescription = null, tint = Slate700, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.AddBusiness, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("List Space", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Slate900)
+                        Text("List Space", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
                 }
 
@@ -177,36 +180,43 @@ fun LandingScreen(
 
                 // Embedded Search Card
                 Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Slate100),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
                     modifier = Modifier.fillMaxWidth().testTag("landing_search_card")
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Text(
                             text = "Where do you want to park?",
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Slate900
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         OutlinedTextField(
                             value = searchLocation,
                             onValueChange = { searchLocation = it },
-                            placeholder = { Text("Area, landmark, or city (e.g. Indiranagar, CP)") },
+                            placeholder = { Text("Area, landmark, or city (e.g. Indiranagar, CP)", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) },
                             leadingIcon = {
                                 Icon(Icons.Default.LocationOn, contentDescription = null, tint = PrimaryBlue)
                             },
                             singleLine = true,
-                            shape = RoundedCornerShape(10.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryBlue,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                            ),
                             modifier = Modifier.fillMaxWidth().testTag("landing_location_input")
                         )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         // Vehicle Type Selector
-                        Text("Vehicle Type", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Slate700)
+                        Text("Vehicle Type", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(modifier = Modifier.height(6.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -215,36 +225,36 @@ fun LandingScreen(
                             listOf("Car", "Bike", "SUV").forEach { v ->
                                 val selected = selectedVehicle == v
                                 Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.White,
-                                    border = if (selected) androidx.compose.foundation.BorderStroke(1.dp, PrimaryBlue) else androidx.compose.foundation.BorderStroke(1.dp, Slate200),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = if (selected) PrimaryBlue.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant,
+                                    border = if (selected) androidx.compose.foundation.BorderStroke(1.dp, PrimaryBlue) else androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
                                     modifier = Modifier
                                         .weight(1f)
                                         .clickable { selectedVehicle = v }
                                 ) {
                                     Text(
                                         text = v,
-                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (selected) PrimaryBlue else Slate700,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (selected) PrimaryBlue else MaterialTheme.colorScheme.onSurface,
                                         fontSize = 12.sp,
-                                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+                                        modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                     )
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
                             onClick = { onSearchDestination(searchLocation, selectedVehicle) },
-                            shape = RoundedCornerShape(10.dp),
+                            shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                            modifier = Modifier.fillMaxWidth().height(48.dp).testTag("landing_search_submit_button")
+                            modifier = Modifier.fillMaxWidth().height(50.dp).testTag("landing_search_submit_button")
                         ) {
                             Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Search Parking", fontWeight = FontWeight.Bold)
+                            Text("Search Parking", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         }
                     }
                 }
@@ -256,12 +266,12 @@ fun LandingScreen(
             Text(
                 text = "How ParkEasy Works",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = Slate900
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = "Seamless parking experience for commuters and space owners",
                 fontSize = 13.sp,
-                color = Slate500
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -270,14 +280,14 @@ fun LandingScreen(
             Row(verticalAlignment = Alignment.Top) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(38.dp).clip(CircleShape).background(Color(0xFFEFF6FF))
+                    modifier = Modifier.size(40.dp).clip(CircleShape).background(PrimaryBlue.copy(alpha = 0.15f))
                 ) {
                     Icon(Icons.Default.Search, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text("1. Search & Select", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Slate900)
-                    Text("Search available spots near your destination, filter by covered/EV, and choose your preferred slot.", fontSize = 12.sp, color = Slate600)
+                    Text("1. Search & Select", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Search available spots near your destination, filter by covered/EV, and choose your preferred slot.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -287,14 +297,14 @@ fun LandingScreen(
             Row(verticalAlignment = Alignment.Top) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(38.dp).clip(CircleShape).background(Color(0xFFDCFCE7))
+                    modifier = Modifier.size(40.dp).clip(CircleShape).background(AccentEmerald.copy(alpha = 0.15f))
                 ) {
                     Icon(Icons.Default.QrCode, contentDescription = null, tint = AccentEmerald, modifier = Modifier.size(20.dp))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text("2. Book & Get Digital Pass", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Slate900)
-                    Text("Pay securely via UPI, Card, or Wallet and receive an instant QR parking pass with guaranteed reservation.", fontSize = 12.sp, color = Slate600)
+                    Text("2. Book & Get Digital Pass", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Pay securely via UPI, Card, or Wallet and receive an instant QR parking pass with guaranteed reservation.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -304,14 +314,14 @@ fun LandingScreen(
             Row(verticalAlignment = Alignment.Top) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(38.dp).clip(CircleShape).background(Color(0xFFFEF3C7))
+                    modifier = Modifier.size(40.dp).clip(CircleShape).background(Color(0xFFF59E0B).copy(alpha = 0.15f))
                 ) {
-                    Icon(Icons.Default.Speed, contentDescription = null, tint = Color(0xFFD97706), modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Speed, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(20.dp))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text("3. Navigate & Park with Ease", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Slate900)
-                    Text("Drive straight to the verified location, show your digital QR pass at the gate, and park safely.", fontSize = 12.sp, color = Slate600)
+                    Text("3. Navigate & Park with Ease", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Drive straight to the verified location, show your digital QR pass at the gate, and park safely.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -321,7 +331,7 @@ fun LandingScreen(
             Text(
                 text = "Available in Top Cities",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Slate900
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -332,17 +342,18 @@ fun LandingScreen(
             ) {
                 cities.take(3).forEach { city ->
                     Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Slate100,
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
                         modifier = Modifier.weight(1f).clickable { onSearchDestination(city, "Car") }
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(vertical = 10.dp)
+                            modifier = Modifier.padding(vertical = 12.dp)
                         ) {
                             Icon(Icons.Default.LocationCity, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(city, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Slate900)
+                            Text(city, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -350,3 +361,4 @@ fun LandingScreen(
         }
     }
 }
+
