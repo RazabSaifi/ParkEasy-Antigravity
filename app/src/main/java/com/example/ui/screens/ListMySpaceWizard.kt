@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -41,7 +42,13 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material.icons.filled.Videocam
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import com.example.data.util.IndianLocations
 import com.example.data.util.UserLocation
 import com.example.ui.components.LocationSelectorTriggerButton
@@ -144,6 +151,14 @@ fun ListMySpaceWizard(
     var easyEntry by remember { mutableStateOf(true) }
 
     // Photos
+    var selectedPhotoUri by remember { mutableStateOf<String?>(null) }
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            selectedPhotoUri = uri.toString()
+        }
+    }
     var photoEntranceSelected by remember { mutableStateOf(true) }
     var photoSpaceSelected by remember { mutableStateOf(true) }
     var photoSurroundingsSelected by remember { mutableStateOf(true) }
@@ -712,8 +727,126 @@ fun ListMySpaceWizard(
                     // Step 6: Photos
                     StepHeader(
                         title = "Upload Space Photos",
-                        subtitle = "Clear photos showing the entrance, slot, and street surroundings help seekers park with confidence."
+                        subtitle = "Clear photos showing your slot, entrance, and street help seekers park with confidence."
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Interactive Custom Photo Upload & Camera Action Card
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isDark) CharcoalSurface else Color.White,
+                        border = BorderStroke(1.5.dp, if (selectedPhotoUri != null) AccentEmerald else PrimaryBlue.copy(alpha = 0.5f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            }
+                    ) {
+                        if (selectedPhotoUri != null) {
+                            Column(modifier = Modifier.padding(14.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(Color.Black)
+                                ) {
+                                    AsyncImage(
+                                        model = selectedPhotoUri,
+                                        contentDescription = "Selected Spot Photo",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = AccentEmerald,
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "✓ Photo Attached",
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Primary spot photo ready",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (isDark) Color.White else Slate900
+                                    )
+                                    Text(
+                                        text = "Tap to Change",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PrimaryBlue
+                                    )
+                                }
+                            }
+                        } else {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(PrimaryBlue.copy(alpha = 0.1f))
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CameraAlt,
+                                        contentDescription = "Upload Photo",
+                                        tint = PrimaryBlue,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(14.dp))
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Take Photo or Upload from Device",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        color = if (isDark) Color.White else Slate900
+                                    )
+                                    Text(
+                                        text = "Tap to capture with camera or choose from gallery",
+                                        fontSize = 11.sp,
+                                        color = Slate500
+                                    )
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = PrimaryBlue
+                                ) {
+                                    Text(
+                                        text = "Select",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
 
                     val photoItems = listOf(
@@ -729,10 +862,10 @@ fun ListMySpaceWizard(
                             border = BorderStroke(1.dp, Slate200),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 6.dp)
+                                .padding(vertical = 5.dp)
                         ) {
                             Row(
-                                modifier = Modifier.padding(14.dp),
+                                modifier = Modifier.padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -740,7 +873,7 @@ fun ListMySpaceWizard(
                                     Box(
                                         contentAlignment = Alignment.Center,
                                         modifier = Modifier
-                                            .size(42.dp)
+                                            .size(38.dp)
                                             .clip(RoundedCornerShape(10.dp))
                                             .background(Color(0xFFEFF6FF))
                                     ) {
@@ -748,7 +881,7 @@ fun ListMySpaceWizard(
                                             imageVector = Icons.Default.AddPhotoAlternate,
                                             contentDescription = null,
                                             tint = PrimaryBlue,
-                                            modifier = Modifier.size(22.dp)
+                                            modifier = Modifier.size(20.dp)
                                         )
                                     }
 
@@ -774,7 +907,7 @@ fun ListMySpaceWizard(
                                     color = Color(0xFFDCFCE7)
                                 ) {
                                     Text(
-                                        text = "✓ Attached",
+                                        text = "✓ Verified",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF15803D),
@@ -1137,9 +1270,10 @@ fun ListMySpaceWizard(
                                     address = address.ifBlank { "12, Central Avenue" },
                                     area = area.ifBlank { "Indiranagar" },
                                     city = city.ifBlank { "Bengaluru" },
+                                    state = state,
                                     pincode = pincode.ifBlank { "560038" },
-                                    latitude = 12.9716,
-                                    longitude = 77.5946,
+                                    latitude = latitude,
+                                    longitude = longitude,
                                     parkingType = parkingType,
                                     vehicleCapacity = capacity,
                                     supportedVehicles = supportedVehicles.joinToString(", "),
@@ -1157,7 +1291,8 @@ fun ListMySpaceWizard(
                                     availableDays = daysText,
                                     availableTimings = timingsText,
                                     status = "Active",
-                                    verificationStatus = "Verified"
+                                    verificationStatus = "Verified",
+                                    parkingPhoto = selectedPhotoUri ?: "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800&q=80"
                                 )
                                 onPublish(newSpace)
                             }

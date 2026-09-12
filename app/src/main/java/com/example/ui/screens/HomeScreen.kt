@@ -54,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ParkingSpace
+import com.example.data.model.User
 import com.example.data.util.IndianLocations
 import com.example.data.util.LocationUtils
 import com.example.data.util.UserLocation
